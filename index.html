@@ -552,7 +552,7 @@
    - 日期：每次開啟頁面自動抓當天日期，不用手動改
    - 版次：只要在這裡改 SITE_VERSION 一個地方，footer 會自動同步
 --------------------------------------------------------- */
-const SITE_VERSION = "V3"; // 之後更新版本，只需要改這一行，例如 "V4"
+const SITE_VERSION = "V4"; // 之後更新版本，只需要改這一行，例如 "V5"
 (function initFooterMeta(){
   const now = new Date();
   const y = now.getFullYear();
@@ -647,7 +647,7 @@ document.getElementById("zodiacBtn").addEventListener("click", async ()=>{
   const focus = document.getElementById("zodiacFocus").value || "整體運勢";
   document.getElementById("zodiacChips").innerHTML = `<span class="chip">星座：${sign}</span><span class="chip">關注：${focus}</span>`;
   const readingEl = document.getElementById("zodiacReading");
-  readingEl.innerHTML = `<span class="placeholder">生成中...</span>`;
+  readingEl.innerHTML = `<span class="placeholder">正在為你解讀星象...</span>`;
   const btn = document.getElementById("zodiacBtn"); btn.disabled = true;
   const text = await askClaude(
     "你是一位溫暖、務實的占星顧問。請用繁體中文，針對使用者的星座給予具體但不誇大、不做絕對預言的運勢建議，語氣像是善解人意的朋友，並在最後提醒運勢僅供參考。控制在250字以內。",
@@ -701,7 +701,7 @@ document.getElementById("tarotBtn").addEventListener("click", async ()=>{
     </div>`).join("");
   document.getElementById("tarotCards").innerHTML = cardsHtml;
   const readingEl = document.getElementById("tarotReading");
-  readingEl.innerHTML = `<span class="placeholder">生成中...</span>`;
+  readingEl.innerHTML = `<span class="placeholder">正在洗牌問卜...</span>`;
   const btn = document.getElementById("tarotBtn"); btn.disabled = true;
   const cardDesc = drawn.map(c=>`${c.position}：${c.name}${c.reversed?"（逆位）":"（正位）"}，關鍵字：${c.reversed?c.rev:c.up}`).join("；");
   const text = await askClaude(
@@ -774,7 +774,7 @@ document.getElementById("baziBtn").addEventListener("click", async ()=>{
     <span class="chip">生肖 ${pillars.animal}</span>`;
 
   const readingEl = document.getElementById("baziReading");
-  readingEl.innerHTML = `<span class="placeholder">生成中...</span>`;
+  readingEl.innerHTML = `<span class="placeholder">正在排盤演算...</span>`;
   const btn = document.getElementById("baziBtn"); btn.disabled = true;
   const text = await askClaude(
     "你是一位穩重、用詞平實的命理顧問。使用者會給你四柱干支（簡化估算版），請用繁體中文，針對五行生剋的大方向給出個性傾向與生活建議的解讀，避免對健康、財務做絕對斷言，語氣溫和務實。控制在300字以內，並提醒這是簡化估算結果。",
@@ -865,7 +865,7 @@ document.getElementById("nameBtn").addEventListener("click", async ()=>{
     <span class="chip mono">總格 ${zongge}</span>`;
 
   const readingEl = document.getElementById("nameReading");
-  readingEl.innerHTML = `<span class="placeholder">生成中...</span>`;
+  readingEl.innerHTML = `<span class="placeholder">正在測字論命...</span>`;
   const btn = document.getElementById("nameBtn"); btn.disabled = true;
   const text = await askClaude(
     "你是一位親切務實的姓名學顧問。使用者會給你五格數理（天格、人格、地格、外格、總格），請用繁體中文，針對數理組合給予個性特質與人際/事業傾向的解讀，語氣正向但不誇大，避免絕對斷言吉凶。控制在280字以內。",
@@ -894,7 +894,7 @@ document.getElementById("ziweiBtn").addEventListener("click", async ()=>{
     <span class="chip mono">命宮 ${mingGongBranch}宮</span>`;
 
   const readingEl = document.getElementById("ziweiReading");
-  readingEl.innerHTML = `<span class="placeholder">生成中...</span>`;
+  readingEl.innerHTML = `<span class="placeholder">正在推演命盤...</span>`;
   const btn = document.getElementById("ziweiBtn"); btn.disabled = true;
   const text = await askClaude(
     "你是一位熟悉紫微斗數的命理顧問。使用者只提供了命宮所在地支宮位（尚未有完整十四主星排盤），請用繁體中文，根據命宮地支的方位意象，給出人生大方向、性格傾向的解讀，並明確提醒這只是簡化估算、非完整命盤分析。語氣沉穩、不誇大。控制在280字以內。",
