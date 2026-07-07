@@ -23,6 +23,14 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "輸入內容過長" });
   }
 
+  const rawKey = process.env.GEMINI_API_KEY || "";
+  console.log("金鑰診斷：", JSON.stringify({
+    length: rawKey.length,
+    head: rawKey.slice(0, 6),
+    tail: rawKey.slice(-6),
+    hasWhitespace: /\s/.test(rawKey)
+  }));
+
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
