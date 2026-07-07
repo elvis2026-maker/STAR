@@ -28,7 +28,8 @@ V2 開始改用 **Google Gemini API**（`gemini-2.5-flash` 模型），原因是
 
 
 ## 版本紀錄
-- **V2（目前版本）**：① 配色調整——頭尾（header／hero／footer）維持深色星空風格，中間的輸入／解讀面板改為宣紙淺色系，長時間閱讀更不傷眼，同時保留玄機氛圍。② AI 解讀後端改用 Google Gemini API（原本是 Anthropic），改用免費額度、不用綁信用卡，細節見下方「AI 解讀用的是哪個服務」。
+- **V3（目前版本）**：修正 AI 解讀後端呼叫 Gemini API 的金鑰傳遞方式——改用官方建議的 `x-goog-api-key` Header（原本是網址參數 `?key=`），解決新版 `AQ.` 開頭金鑰可能出現的 400「API key not valid」錯誤；新增 `package.json` 解決部署時的 ESM 轉換警告訊息。
+- V2：① 配色調整——頭尾（header／hero／footer）維持深色星空風格，中間的輸入／解讀面板改為宣紙淺色系，長時間閱讀更不傷眼，同時保留玄機氛圍。② AI 解讀後端改用 Google Gemini API（原本是 Anthropic），改用免費額度、不用綁信用卡，細節見下方「AI 解讀用的是哪個服務」。
 - V1：全站深色星空風格 + Anthropic API（初版）。
 
 ## 目前已完成的功能
