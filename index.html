@@ -338,22 +338,23 @@
   .stroke-fix .field{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-dim);}
   .stroke-fix input{width:60px; padding:6px 8px;}
 
-  .wuxing-chart{ margin-bottom:20px; }
-  .wuxing-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:12.5px; }
-  .wuxing-row .wx-label{ width:28px; flex-shrink:0; font-family:'Noto Serif TC',serif; font-weight:700; color:var(--ink); text-align:center; }
-  .wuxing-row .wx-track{ flex:1; height:12px; border-radius:999px; background:rgba(43,36,24,0.08); overflow:hidden; position:relative; }
-  .wuxing-row .wx-fill{ height:100%; border-radius:999px; position:relative; overflow:hidden; }
-  .wuxing-row .wx-fill.filling{ box-shadow:0 0 10px rgba(166,124,61,0.45); }
-  /* 跑分進行中的光澤掃過效果 */
-  .wuxing-row .wx-fill::after{
-    content:""; position:absolute; inset:0;
-    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.65), transparent);
-    transform:translateX(-100%);
+  /* 八字：五行分布「五邊形」雷達圖（V8 起改為五邊形比例圖，取代原本的長條圖） */
+  .wuxing-chart{ margin-bottom:22px; }
+  .wuxing-pentagon-wrap{ max-width:280px; margin:0 auto; position:relative; }
+  .wuxing-pentagon{ width:100%; height:auto; overflow:visible; display:block; }
+  .wx-grid{ fill:none; stroke:rgba(43,36,24,0.10); stroke-width:1; }
+  .wx-grid:last-of-type{ stroke:rgba(43,36,24,0.18); }
+  .wx-star{ fill:none; stroke:rgba(178,59,59,0.22); stroke-width:1; stroke-dasharray:3 3; }
+  .wx-data-poly{
+    fill:rgba(166,124,61,0.22); stroke:var(--gold-deep); stroke-width:2;
+    stroke-linejoin:round; filter:drop-shadow(0 0 6px rgba(166,124,61,0.45));
   }
-  .wuxing-row .wx-fill.filling::after{ animation:wxShimmer .9s ease-in-out infinite; }
-  @keyframes wxShimmer{ 0%{transform:translateX(-100%);} 100%{transform:translateX(220%);} }
-  @media (prefers-reduced-motion: reduce){ .wuxing-row .wx-fill.filling::after{animation:none;} }
-  .wuxing-row .wx-count{ width:22px; flex-shrink:0; text-align:right; color:var(--gold-deep); font-weight:700; font-family:'Space Mono',monospace; }
+  .wx-dot{ stroke:var(--paper); stroke-width:1.5; }
+  .wx-label-name{ font-family:'Noto Serif TC',serif; font-size:15px; font-weight:700; }
+  .wx-label-count{ font-family:'Space Mono',monospace; font-size:12px; font-weight:700; fill:var(--ink-dim); }
+  .wuxing-legend{ display:flex; justify-content:center; gap:14px; flex-wrap:wrap; margin-top:6px; font-size:11.5px; color:var(--ink-dim); }
+  .wuxing-legend span{ display:inline-flex; align-items:center; gap:4px; }
+  .wuxing-legend i{ width:8px; height:8px; border-radius:50%; display:inline-block; }
 
   .tarot-cards{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px; min-height:150px;}
   .tarot-card{
@@ -401,6 +402,47 @@
   .tarot-flip-front .name{font-family:'Noto Serif TC', serif; font-size:14px; margin-bottom:4px;}
   .tarot-flip-front .dir{color:var(--jade); font-size:11px;}
   .tarot-flip-front .dir.rev{color:var(--cinnabar);}
+
+  /* 塔羅：card 上的 SVG 插畫（V8 新增）。逆位時只旋轉圖案，文字維持正向可讀 */
+  .tarot-icon{ width:40px; height:40px; margin-bottom:4px; overflow:visible; }
+  .tarot-icon svg{ width:100%; height:100%; }
+  .tarot-icon .ic-line{ fill:none; stroke:var(--gold-deep); stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
+  .tarot-icon .ic-fill{ fill:var(--gold-deep); }
+  .tarot-flip-front.rev .tarot-icon svg{ transform:rotate(180deg); }
+  .tarot-flip-front.rev .ic-line{ stroke:var(--cinnabar); }
+  .tarot-flip-front.rev .ic-fill{ fill:var(--cinnabar); }
+
+  /* 塔羅：抽牌重點特寫卡（V8 新增）——把三張牌的關鍵字獨立「特寫」出來，
+     跟下方 AI 完整解讀分開，方便使用者一眼抓到重點 */
+  .tarot-keypoints{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+  .tarot-keypoints .kp-card{
+    flex:1; min-width:140px; padding:12px 14px; border-radius:10px;
+    border:1px solid var(--paper-line); background:rgba(166,124,61,0.06);
+    display:flex; align-items:center; gap:10px;
+    animation:chipPop .45s cubic-bezier(.2,.8,.3,1.1) both;
+  }
+  .tarot-keypoints .kp-icon{ width:30px; height:30px; flex-shrink:0; }
+  .tarot-keypoints .kp-icon svg{ width:100%; height:100%; }
+  .tarot-keypoints .kp-icon .ic-line{ fill:none; stroke:var(--gold-deep); stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
+  .tarot-keypoints .kp-icon .ic-fill{ fill:var(--gold-deep); }
+  .tarot-keypoints .kp-card.rev .kp-icon svg{ transform:rotate(180deg); }
+  .tarot-keypoints .kp-card.rev .ic-line{ stroke:var(--cinnabar); }
+  .tarot-keypoints .kp-card.rev .ic-fill{ fill:var(--cinnabar); }
+  .tarot-keypoints .kp-pos{ font-size:10px; letter-spacing:1px; color:var(--gold-deep-dim); }
+  .tarot-keypoints .kp-name{ font-family:'Noto Serif TC',serif; font-size:14px; font-weight:700; color:var(--ink); }
+  .tarot-keypoints .kp-word{ font-size:11.5px; color:var(--jade); }
+  .tarot-keypoints .kp-card.rev .kp-word{ color:var(--cinnabar); }
+  .reading-highlight{
+    position:relative; margin:0 0 16px; padding:14px 18px 14px 20px;
+    border-left:3px solid var(--gold-deep); background:rgba(166,124,61,0.08);
+    border-radius:0 8px 8px 0; font-family:'Noto Serif TC',serif;
+    font-size:15px; color:var(--ink); line-height:1.75;
+    animation:chipPop .5s cubic-bezier(.2,.8,.3,1.1) both;
+  }
+  .reading-highlight .rh-tag{
+    display:block; font-family:'Space Mono',monospace; font-size:10.5px;
+    letter-spacing:2px; color:var(--gold-deep-dim); margin-bottom:4px;
+  }
   @keyframes tarotDealIn{
     from{ opacity:0; transform:translateY(16px) scale(.9); }
     to{ opacity:1; transform:translateY(0) scale(1); }
@@ -702,7 +744,7 @@
    - 日期：每次開啟頁面自動抓當天日期，不用手動改
    - 版次：只要在這裡改 SITE_VERSION 一個地方，footer 會自動同步
 --------------------------------------------------------- */
-const SITE_VERSION = "V7"; // 之後更新版本，只需要改這一行，例如 "V8"
+const SITE_VERSION = "V8"; // 之後更新版本，只需要改這一行，例如 "V9"
 (function initFooterMeta(){
   const now = new Date();
   const y = now.getFullYear();
@@ -874,15 +916,74 @@ const TAROT_DECK = [
   {name:"審判", up:"覺醒、重新評估、召喚", rev:"自我批判、猶疑不前"},
   {name:"世界", up:"圓滿、階段性完成", rev:"未竟之事、延遲的完整"}
 ];
+
+// V8 新增：22 張大阿爾卡納牌的簡化原創 SVG 線條圖示（非重製任何現有牌卡美術，
+// 純粹以幾何線條象徵每張牌的核心意象），翻牌後顯示在卡面上，逆位時整個圖示會旋轉 180 度。
+const TAROT_ICONS = {
+  "愚者": `<svg viewBox="0 0 100 100"><circle class="ic-line" cx="50" cy="26" r="10"/><path class="ic-line" d="M50 36 L50 60 M50 43 L34 53 M50 43 L66 53 M50 60 L38 80 M50 60 L64 74"/><path class="ic-line" d="M14 82 L86 82"/></svg>`,
+  "魔術師": `<svg viewBox="0 0 100 100"><path class="ic-line" d="M35 30 C35 20,50 20,50 30 C50 20,65 20,65 30 C65 40,50 40,50 30 C50 40,35 40,35 30 Z"/><path class="ic-line" d="M20 78 L80 78 M50 45 L50 78"/></svg>`,
+  "女祭司": `<svg viewBox="0 0 100 100"><path class="ic-line" d="M55 18 A11 11 0 1 0 55 40 A8 8 0 1 1 55 18 Z"/><path class="ic-line" d="M25 42 L25 86 M75 42 L75 86"/><path class="ic-line" d="M35 62 L65 62" stroke-dasharray="4 4"/></svg>`,
+  "皇后": `<svg viewBox="0 0 100 100"><circle class="ic-line" cx="50" cy="35" r="18"/><path class="ic-line" d="M50 53 L50 86 M34 68 L66 68"/></svg>`,
+  "皇帝": `<svg viewBox="0 0 100 100"><path class="ic-line" d="M30 40 C20 26,15 16,25 10 M70 40 C80 26,85 16,75 10"/><path class="ic-line" d="M25 40 L75 40 L70 86 L30 86 Z"/></svg>`,
+  "教皇": `<svg viewBox="0 0 100 100"><path class="ic-line" d="M50 10 L50 90 M34 30 L66 30 M37 48 L63 48 M40 66 L60 66"/></svg>`,
+  "戀人": `<svg viewBox="0 0 100 100"><circle class="ic-line" cx="41" cy="60" r="22"/><circle class="ic-line" cx="63" cy="60" r="22"/><path class="ic-line" d="M52 20 L52 6 M42 24 L35 13 M62 24 L69 13"/></svg>`,
+  "戰車": `<svg viewBox="0 0 100 100"><circle class="ic-line" cx="50" cy="56" r="22"/><path class="ic-line" d="M50 34 L50 78 M28 56 L72 56 M34 40 L66 72 M66 40 L34 72"/><path class="ic-line" d="M14 20 L30 20 M23 13 L30 20 L23 27"/><path class="ic-line" d="M86 20 L70 20 M77 13 L70 20 L77 27"/></svg>`,
+  "力量": `<svg viewBox="0 0 100 100"><path class="ic-line" d="M30 18 C30 10,42 10,42 18 C42 10,54 10,54 18 C54 26,42 26,42 18 C42 26,30 26,30 18 Z"/><circle class="ic-line" cx="50" cy="60" r="16"/><path class="ic-line" d="M50 40 L50 32 M64 46 L71 39 M70 60 L79 60 M64 74 L71 81 M36 46 L29 39 M30 60 L21 60 M36 74 L29 81"/></svg>`,
+  "隱士": `<svg viewBox="0 0 100 100"><path class="ic-line" d="M50 14 L66 24 L66 44 L50 54 L34 44 L34 24 Z"/><path class="ic-fill" d="M50 24 L53 32 L61 32 L54 37 L57 45 L50 40 L43 45 L46 37 L39 32 L47 32 Z"/><path class="ic-line" d="M50 54 L50 90"/></svg>`,
+  "命運之輪": `<svg viewBox="0 0 100 100"><circle class="ic-line" cx="50" cy="50" r="28"/><path class="ic-line" d="M50 22 L50 78 M22 50 L78 50 M31 31 L69 69 M69 31 L31 69"/><circle class="ic-fill" cx="50" cy="12" r="4"/><circle class="ic-fill" cx="88" cy="50" r="4"/><circle class="ic-fill" cx="50" cy="88" r="4"/><circle class="ic-fill" cx="12" cy="50" r="4"/></svg>`,
+  "正義": `<svg viewBox="0 0 100 100"><path class="ic-line" d="M50 10 L50 84 M25 28 L75 28"/><path class="ic-line" d="M25 28 L15 50 A10 6 0 0 0 35 50 Z"/><path class="ic-line" d="M75 28 L65 50 A10 6 0 0 0 85 50 Z"/><path class="ic-line" d="M34 86 L66 86"/></svg>`,
+  "吊人": `<svg viewBox="0 0 100 100"><path class="ic-line" d="M18 18 L82 18 M50 18 L50 33"/><circle class="ic-line" cx="50" cy="46" r="10"/><path class="ic-line" d="M50 56 L50 74 M50 60 L37 68 M50 60 L63 68 M50 74 L41 90 M50 74 L61 60"/></svg>`,
+  "死神": `<svg viewBox="0 0 100 100"><path class="ic-line" d="M28 14 L72 14 L50 50 L72 86 L28 86 L50 50 Z"/></svg>`,
+  "節制": `<svg viewBox="0 0 100 100"><path class="ic-line" d="M18 38 L18 64 A11 9 0 0 0 40 64 L40 38"/><path class="ic-line" d="M60 38 L60 64 A11 9 0 0 0 82 64 L82 38"/><path class="ic-line" d="M34 44 L50 33 L66 48"/></svg>`,
+  "惡魔": `<svg viewBox="0 0 100 100"><circle class="ic-line" cx="50" cy="50" r="30"/><path class="ic-line" d="M50 24 L62 66 L27 40 L73 40 L38 66 Z"/></svg>`,
+  "高塔": `<svg viewBox="0 0 100 100"><path class="ic-line" d="M35 88 L35 30 L50 14 L65 30 L65 88"/><path class="ic-fill" d="M56 6 L45 30 L52 30 L41 52 L61 26 L52 26 Z"/><circle class="ic-fill" cx="18" cy="72" r="3.5"/><circle class="ic-fill" cx="82" cy="60" r="3.5"/></svg>`,
+  "星星": `<svg viewBox="0 0 100 100"><path class="ic-line" d="M50 12 L57 39 L82 39 L61 55 L69 81 L50 65 L31 81 L39 55 L18 39 L43 39 Z"/></svg>`,
+  "月亮": `<svg viewBox="0 0 100 100"><path class="ic-line" d="M62 18 A23 23 0 1 0 62 64 A17 17 0 1 1 62 18 Z"/><path class="ic-line" d="M18 86 Q50 70 82 86" stroke-dasharray="4 4"/></svg>`,
+  "太陽": `<svg viewBox="0 0 100 100"><circle class="ic-line" cx="50" cy="50" r="18"/><path class="ic-line" d="M50 18 L50 6 M50 82 L50 94 M18 50 L6 50 M82 50 L94 50 M27 27 L18 18 M73 27 L82 18 M27 73 L18 82 M73 73 L82 82"/></svg>`,
+  "審判": `<svg viewBox="0 0 100 100"><path class="ic-line" d="M34 40 L60 24 L60 56 L34 46 Z"/><path class="ic-line" d="M60 30 L77 24 M60 40 L80 40 M60 50 L77 56"/><path class="ic-line" d="M28 70 L72 70 L72 90 L28 90 Z"/><path class="ic-line" d="M50 56 L50 70"/></svg>`,
+  "世界": `<svg viewBox="0 0 100 100"><ellipse class="ic-line" cx="50" cy="50" rx="32" ry="38" stroke-dasharray="6 5"/><circle class="ic-fill" cx="50" cy="50" r="6"/></svg>`
+};
+function tarotIconHTML(name){
+  return TAROT_ICONS[name] || "";
+}
+
+// V8 新增：把三張牌的「重點關鍵字」獨立特寫成一排卡片，跟下方 AI 完整解讀分開，
+// 方便使用者一眼掌握過去／現在／未來三張牌的核心重點，不必先讀完整段文字才抓得到重點。
+function tarotKeypointsHTML(drawn){
+  const cards = drawn.map(c=>`
+    <div class="kp-card${c.reversed ? ' rev' : ''}">
+      <div class="kp-icon">${tarotIconHTML(c.name)}</div>
+      <div>
+        <div class="kp-pos">${c.position}</div>
+        <div class="kp-name">${c.name}${c.reversed ? "（逆位）":"（正位）"}</div>
+        <div class="kp-word">${c.reversed ? c.rev : c.up}</div>
+      </div>
+    </div>`).join("");
+  return `<div class="tarot-keypoints">${cards}</div>`;
+}
+
+// V8 新增：從 AI 回覆的完整解讀中，抓出最後一句（通常是「具體可行的建議」）
+// 獨立做成醒目的「重點提示」特寫區塊，放在完整內文之前。
+function extractPullQuote(text){
+  const sentences = text.trim().split(/(?<=[。！？!?])/).map(s=>s.trim()).filter(Boolean);
+  if(sentences.length===0) return null;
+  const last = sentences[sentences.length-1];
+  // 太短（例如只是「。」或標點殘留）就不特別特寫
+  return last.length >= 6 ? last : null;
+}
+
 async function runTarotReading(q, drawn){
   const readingEl = document.getElementById("tarotReading");
-  readingEl.innerHTML = `<span class="placeholder">正在洗牌問卜...</span>`;
+  const keypointsHtml = tarotKeypointsHTML(drawn);
+  readingEl.innerHTML = keypointsHtml + `<span class="placeholder">正在洗牌問卜...</span>`;
   const cardDesc = drawn.map(c=>`${c.position}：${c.name}${c.reversed?"（逆位）":"（正位）"}，關鍵字：${c.reversed?c.rev:c.up}`).join("；");
   const text = await askClaude(
     "你是一位溫和、擅長引導使用者自我反思的塔羅占卜師。請用繁體中文，依照抽到的過去／現在／未來三張牌，針對使用者的問題給予有邏輯脈絡、不做絕對斷言的解讀，並在最後給一句具體可行的建議。控制在300字以內。",
     `我的問題是：「${q}」。抽到的牌是 -- ${cardDesc}。請為我解讀。`
   );
-  readingEl.innerHTML = renderMarkdownLite(text);
+  const quote = extractPullQuote(text);
+  const quoteHtml = quote ? `<div class="reading-highlight"><span class="rh-tag">✦ 重點提示</span>${escapeHtml(quote)}</div>` : "";
+  readingEl.innerHTML = keypointsHtml + quoteHtml + renderMarkdownLite(text);
 }
 
 document.getElementById("tarotBtn").addEventListener("click", ()=>{
@@ -922,7 +1023,8 @@ document.getElementById("tarotBtn").addEventListener("click", ()=>{
             <div class="rune">✦</div>
             <div class="tap-hint">${c.position}／點擊翻牌</div>
           </div>
-          <div class="tarot-flip-face tarot-flip-front">
+          <div class="tarot-flip-face tarot-flip-front${c.reversed ? ' rev' : ''}">
+            <div class="tarot-icon">${tarotIconHTML(c.name)}</div>
             <div class="pos">${c.position}</div>
             <div class="name">${c.name}${c.reversed ? "（逆位）":"（正位）"}</div>
             <div class="dir ${c.reversed?'rev':''}">${c.reversed ? c.rev : c.up}</div>
@@ -1011,54 +1113,102 @@ function computeWuxing(pillars){
   return counts;
 }
 
-function renderWuxingChart(counts){
-  const max = Math.max(...Object.values(counts), 1);
-  const rows = ["木","火","土","金","水"].map(el=>{
-    const c = counts[el];
-    const pct = Math.round((c/max)*100);
-    // 長條與數字都先以 0 渲染，實際「跑分」動畫改由 animateWuxingBars()
-    // 用 requestAnimationFrame 手動逐格計算寬度與數字，不依賴 CSS transition，
-    // 避免瀏覽器把 0%→目標值 兩次寫入合併成單一重繪而導致動畫沒有播放。
-    return `
-      <div class="wuxing-row">
-        <span class="wx-label" style="color:${WUXING_COLOR[el]}">${el}</span>
-        <span class="wx-track"><span class="wx-fill" data-target-width="${pct}" data-target-count="${c}" style="width:0%; background:${WUXING_COLOR[el]}"></span></span>
-        <span class="wx-count">0</span>
-      </div>`;
-  }).join("");
-  return rows;
+// 五邊形佈局：五個頂點依「相生」順序排列（木生火、火生土、土生金、金生水、水生木），
+// 從正上方開始順時針每 72 度一個頂點，剛好排成一個正五邊形。
+// 背景另外畫出「每隔一頂點」相連的虛線星形，剛好對應「相剋」順序（木剋土、土剋水、水剋火、火剋金、金剋木），
+// 當作五行相剋的參考輔助線（視覺小彩蛋，不影響資料呈現）。
+const WUXING_ORDER = ["木","火","土","金","水"];
+const WUXING_CX = 130, WUXING_CY = 128, WUXING_R = 86;
+
+function wxPoint(index, pct){
+  const angle = (-90 + index*72) * Math.PI/180;
+  const r = WUXING_R * (pct/100);
+  return [WUXING_CX + r*Math.cos(angle), WUXING_CY + r*Math.sin(angle)];
+}
+function wxPolyAt(pct){
+  return WUXING_ORDER.map((_,i)=> wxPoint(i,pct).map(n=>n.toFixed(1)).join(",")).join(" ");
 }
 
-function animateWuxingBars(container){
-  const rows = Array.from(container.querySelectorAll(".wuxing-row"));
-  if(rows.length===0) return;
+function renderWuxingChart(counts){
+  const max = Math.max(...Object.values(counts), 1);
+
+  const gridPolys = [25,50,75,100].map(pct=>
+    `<polygon class="wx-grid" points="${wxPolyAt(pct)}"></polygon>`
+  ).join("");
+
+  const starOrder = [0,2,4,1,3,0]; // 相剋順序
+  const starPts = starOrder.map(i=> wxPoint(i,100).map(n=>n.toFixed(1)).join(",")).join(" ");
+  const starLine = `<polyline class="wx-star" points="${starPts}"></polyline>`;
+
+  // 資料五邊形先渲染在原點（半徑 0），實際「展開」動畫交給 animateWuxingPentagon()
+  // 用 requestAnimationFrame 逐格計算頂點座標，跟原本長條圖動畫同樣的手法，
+  // 避免瀏覽器把兩次寫入合併成單一重繪而導致動畫沒有播放。
+  const dataPoly = `<polygon class="wx-data-poly" data-max="${max}" data-counts='${JSON.stringify(counts)}' points="${wxPolyAt(0)}"></polygon>`;
+
+  const dots = WUXING_ORDER.map((el,i)=>{
+    const [x,y] = wxPoint(i,0);
+    return `<circle class="wx-dot" data-index="${i}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" fill="${WUXING_COLOR[el]}"></circle>`;
+  }).join("");
+
+  const labels = WUXING_ORDER.map((el,i)=>{
+    const [lx,ly] = wxPoint(i, 130);
+    return `
+      <text class="wx-label-name" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" fill="${WUXING_COLOR[el]}">${el}</text>
+      <text class="wx-label-count" data-target-count="${counts[el]}" x="${lx.toFixed(1)}" y="${(ly+15).toFixed(1)}" text-anchor="middle">0</text>`;
+  }).join("");
+
+  return `
+    <div class="wuxing-pentagon-wrap">
+      <svg class="wuxing-pentagon" viewBox="0 0 260 260">
+        ${gridPolys}
+        ${starLine}
+        ${dataPoly}
+        ${dots}
+        ${labels}
+      </svg>
+      <div class="wuxing-legend">
+        ${WUXING_ORDER.map(el=>`<span><i style="background:${WUXING_COLOR[el]}"></i>${el}：${counts[el]}</span>`).join("")}
+      </div>
+    </div>`;
+}
+
+function animateWuxingPentagon(container){
+  const svg = container.querySelector(".wuxing-pentagon");
+  if(!svg) return;
+  const dataPoly = svg.querySelector(".wx-data-poly");
+  const counts = JSON.parse(dataPoly.getAttribute("data-counts"));
+  const max = Number(dataPoly.getAttribute("data-max"));
+  const targets = WUXING_ORDER.map(el=> (counts[el]/max)*100);
+  const dots = Array.from(svg.querySelectorAll(".wx-dot"));
+  const countTexts = Array.from(svg.querySelectorAll(".wx-label-count"));
+
   const DURATION = 900; // 毫秒
   function easeOutCubic(t){ return 1 - Math.pow(1-t, 3); }
 
-  rows.forEach(row=> row.querySelector(".wx-fill").classList.add("filling"));
+  function pointsAt(eased){
+    return WUXING_ORDER.map((el,i)=>{
+      const [x,y] = wxPoint(i, targets[i]*eased);
+      dots[i].setAttribute("cx", x.toFixed(1));
+      dots[i].setAttribute("cy", y.toFixed(1));
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(" ");
+  }
 
   const start = performance.now();
   function frame(now){
     const t = Math.min(1, (now-start)/DURATION);
     const eased = easeOutCubic(t);
-    rows.forEach(row=>{
-      const fill = row.querySelector(".wx-fill");
-      const countEl = row.querySelector(".wx-count");
-      const targetWidth = Number(fill.getAttribute("data-target-width"));
-      const targetCount = Number(fill.getAttribute("data-target-count"));
-      fill.style.width = (targetWidth*eased).toFixed(1) + "%";
-      countEl.textContent = Math.round(targetCount*eased);
+    dataPoly.setAttribute("points", pointsAt(eased));
+    countTexts.forEach((el,i)=>{
+      const target = Number(el.getAttribute("data-target-count"));
+      el.textContent = Math.round(target*eased);
     });
     if(t < 1){
       requestAnimationFrame(frame);
     } else {
-      // 動畫結束，數字與寬度鎖定在精確的目標值，並移除跑分光澤效果
-      rows.forEach(row=>{
-        const fill = row.querySelector(".wx-fill");
-        fill.style.width = fill.getAttribute("data-target-width") + "%";
-        row.querySelector(".wx-count").textContent = fill.getAttribute("data-target-count");
-        fill.classList.remove("filling");
-      });
+      // 動畫結束，座標與數字鎖定在精確的目標值
+      dataPoly.setAttribute("points", pointsAt(1));
+      countTexts.forEach(el=> el.textContent = el.getAttribute("data-target-count"));
     }
   }
   requestAnimationFrame(frame);
@@ -1083,7 +1233,7 @@ document.getElementById("baziBtn").addEventListener("click", async ()=>{
   const wuxingCounts = computeWuxing(pillars);
   const wuxingEl = document.getElementById("baziWuxing");
   wuxingEl.innerHTML = renderWuxingChart(wuxingCounts);
-  animateWuxingBars(wuxingEl);
+  animateWuxingPentagon(wuxingEl);
 
   const readingEl = document.getElementById("baziReading");
   readingEl.innerHTML = `<span class="placeholder mystic-loading"><span class="spin-rune">✦</span> 正在排盤演算...</span>`;
