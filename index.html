@@ -267,7 +267,7 @@
   .wuxing-row .wx-fill{ height:100%; border-radius:999px; transition:width .6s ease; }
   .wuxing-row .wx-count{ width:18px; flex-shrink:0; text-align:right; color:var(--ink-dim); font-family:'Space Mono',monospace; }
 
-  .tarot-cards{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px;}
+  .tarot-cards{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px; min-height:150px;}
   .tarot-card{
     width:100px; padding:14px 10px; border:1px solid var(--gold-deep); border-radius:10px;
     text-align:center; background:linear-gradient(160deg, rgba(166,124,61,0.10), transparent);
@@ -277,6 +277,53 @@
   .tarot-card .name{font-family:'Noto Serif TC', serif; font-size:14px; margin-bottom:4px;}
   .tarot-card .dir{color:var(--jade); font-size:11px;}
   .tarot-card .dir.rev{color:var(--cinnabar);}
+
+  /* 塔羅互動抽牌：洗牌動畫 + 3D 翻牌 */
+  .tarot-hint{font-size:12px; color:var(--ink-dim); margin-bottom:10px; min-height:16px;}
+  .tarot-flip-wrap{
+    width:100px; height:150px; perspective:900px; cursor:pointer;
+    animation:tarotDealIn .45s cubic-bezier(.2,.8,.3,1.1) both;
+  }
+  .tarot-flip-wrap.shuffling{ animation:tarotShuffle .55s ease-in-out; }
+  .tarot-flip-wrap:nth-child(1){animation-delay:.05s;}
+  .tarot-flip-wrap:nth-child(2){animation-delay:.15s;}
+  .tarot-flip-wrap:nth-child(3){animation-delay:.25s;}
+  .tarot-flip-inner{
+    position:relative; width:100%; height:100%; text-align:center;
+    transition:transform .7s cubic-bezier(.2,.7,.2,1); transform-style:preserve-3d;
+  }
+  .tarot-flip-wrap.flipped .tarot-flip-inner{ transform:rotateY(180deg); }
+  .tarot-flip-face{
+    position:absolute; inset:0; backface-visibility:hidden; border-radius:10px;
+    border:1px solid var(--gold-deep); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; padding:10px;
+  }
+  .tarot-flip-back{
+    background:
+      repeating-linear-gradient(45deg, rgba(166,124,61,0.16) 0 6px, rgba(166,124,61,0.05) 6px 12px),
+      linear-gradient(160deg, var(--paper), var(--paper-alt));
+  }
+  .tarot-flip-back .rune{font-family:'Noto Serif TC',serif; font-size:22px; color:var(--gold-deep); opacity:.8;}
+  .tarot-flip-back .tap-hint{font-size:10px; color:var(--gold-deep-dim); margin-top:8px; letter-spacing:1px;}
+  .tarot-flip-front{
+    background:linear-gradient(160deg, rgba(166,124,61,0.10), var(--paper));
+    transform:rotateY(180deg); font-size:12px; color:var(--ink);
+  }
+  .tarot-flip-front .pos{color:var(--gold-deep-dim); font-size:10px; letter-spacing:1px; margin-bottom:6px;}
+  .tarot-flip-front .name{font-family:'Noto Serif TC', serif; font-size:14px; margin-bottom:4px;}
+  .tarot-flip-front .dir{color:var(--jade); font-size:11px;}
+  .tarot-flip-front .dir.rev{color:var(--cinnabar);}
+  @keyframes tarotDealIn{
+    from{ opacity:0; transform:translateY(16px) scale(.9); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+  @keyframes tarotShuffle{
+    0%{ transform:translateX(0) rotate(0deg); }
+    25%{ transform:translateX(-8px) rotate(-4deg); }
+    50%{ transform:translateX(8px) rotate(4deg); }
+    75%{ transform:translateX(-4px) rotate(-2deg); }
+    100%{ transform:translateX(0) rotate(0deg); }
+  }
 
   footer{
     text-align:center; padding:40px 6vw 32px; color:var(--gold-dim); font-size:12px;
@@ -390,7 +437,7 @@
   <div class="eyebrow">MINGLI · PROTOTYPE</div>
   <h1>破譯命盤，<br>看見自己的軌跡</h1>
   <div class="hero-tagline">天機藏於卦象，星辰早有安排</div>
-  <p>整合星座、塔羅、八字、姓名學與紫微斗數，用結構化命理數據，交給 AI 生成屬於你的解讀。</p>
+  <p>整合星座、塔羅、八字、姓名學與紫微斗數，結合結構化命理數據與玄學邏輯推演，為你生成專屬命理解析。</p>
 </section>
 
 <div class="tool-bar" id="toolBar">
@@ -406,7 +453,7 @@
   <!-- ===================== 星座 ===================== -->
   <section class="panel active" id="zodiac" data-index="01 / ZODIAC">
     <h2>星座運勢</h2>
-    <div class="sub">輸入國曆生日，取得星座與 AI 生成的個人化運勢解讀</div>
+    <div class="sub">輸入國曆生日，取得星座命盤與專屬個人化運勢解析</div>
     <div class="grid">
       <div>
         <label>國曆生日</label>
@@ -426,7 +473,7 @@
   <!-- ===================== 塔羅 ===================== -->
   <section class="panel" id="tarot" data-index="02 / TAROT">
     <h2>塔羅占卜</h2>
-    <div class="sub">寫下你的問題，抽出三張牌（過去／現在／未來），由 AI 綜合解讀</div>
+    <div class="sub">寫下你的問題，抽出三張牌（過去／現在／未來），綜合牌陣脈絡為你解牌</div>
     <div class="grid">
       <div>
         <label>你想問的問題</label>
@@ -514,7 +561,7 @@
       <div class="result-col">
         <div class="structured" id="ziweiChips"></div>
         <div class="reading" id="ziweiReading"><span class="placeholder">結果將顯示於此</span></div>
-        <div class="disclaimer">完整紫微斗數需排出十四主星與十二宮全盤，本原型僅估算命宮地支位置作為 AI 解讀依據，尚未實作完整排盤，之後可串接專業排盤引擎補強。</div>
+        <div class="disclaimer">完整紫微斗數需排出十四主星與十二宮全盤，本原型僅估算命宮地支位置作為命理解析依據，尚未實作完整排盤，之後可串接專業排盤引擎補強。</div>
       </div>
     </div>
   </section>
@@ -565,7 +612,7 @@
    - 日期：每次開啟頁面自動抓當天日期，不用手動改
    - 版次：只要在這裡改 SITE_VERSION 一個地方，footer 會自動同步
 --------------------------------------------------------- */
-const SITE_VERSION = "V4"; // 之後更新版本，只需要改這一行，例如 "V5"
+const SITE_VERSION = "V5"; // 之後更新版本，只需要改這一行，例如 "V6"
 (function initFooterMeta(){
   const now = new Date();
   const y = now.getFullYear();
@@ -724,7 +771,18 @@ const TAROT_DECK = [
   {name:"審判", up:"覺醒、重新評估、召喚", rev:"自我批判、猶疑不前"},
   {name:"世界", up:"圓滿、階段性完成", rev:"未竟之事、延遲的完整"}
 ];
-document.getElementById("tarotBtn").addEventListener("click", async ()=>{
+async function runTarotReading(q, drawn){
+  const readingEl = document.getElementById("tarotReading");
+  readingEl.innerHTML = `<span class="placeholder">正在洗牌問卜...</span>`;
+  const cardDesc = drawn.map(c=>`${c.position}：${c.name}${c.reversed?"（逆位）":"（正位）"}，關鍵字：${c.reversed?c.rev:c.up}`).join("；");
+  const text = await askClaude(
+    "你是一位溫和、擅長引導使用者自我反思的塔羅占卜師。請用繁體中文，依照抽到的過去／現在／未來三張牌，針對使用者的問題給予有邏輯脈絡、不做絕對斷言的解讀，並在最後給一句具體可行的建議。控制在300字以內。",
+    `我的問題是：「${q}」。抽到的牌是 -- ${cardDesc}。請為我解讀。`
+  );
+  readingEl.innerHTML = renderMarkdownLite(text);
+}
+
+document.getElementById("tarotBtn").addEventListener("click", ()=>{
   const q = document.getElementById("tarotQuestion").value.trim();
   if(!q){ alert("請先輸入你的問題"); return; }
   const shuffled = [...TAROT_DECK].sort(()=>Math.random()-0.5).slice(0,3);
@@ -733,23 +791,58 @@ document.getElementById("tarotBtn").addEventListener("click", async ()=>{
     const reversed = Math.random() < 0.5;
     return {...c, position: positions[i], reversed};
   });
-  const cardsHtml = drawn.map(c=>`
-    <div class="tarot-card">
-      <div class="pos">${c.position}</div>
-      <div class="name">${c.name}${c.reversed ? "（逆位）":"（正位）"}</div>
-      <div class="dir ${c.reversed?'rev':''}">${c.reversed ? c.rev : c.up}</div>
-    </div>`).join("");
-  document.getElementById("tarotCards").innerHTML = cardsHtml;
+
+  const cardsWrap = document.getElementById("tarotCards");
   const readingEl = document.getElementById("tarotReading");
-  readingEl.innerHTML = `<span class="placeholder">正在洗牌問卜...</span>`;
-  const btn = document.getElementById("tarotBtn"); btn.disabled = true;
-  const cardDesc = drawn.map(c=>`${c.position}：${c.name}${c.reversed?"（逆位）":"（正位）"}，關鍵字：${c.reversed?c.rev:c.up}`).join("；");
-  const text = await askClaude(
-    "你是一位溫和、擅長引導使用者自我反思的塔羅占卜師。請用繁體中文，依照抽到的過去／現在／未來三張牌，針對使用者的問題給予有邏輯脈絡、不做絕對斷言的解讀，並在最後給一句具體可行的建議。控制在300字以內。",
-    `我的問題是：「${q}」。抽到的牌是 -- ${cardDesc}。請為我解讀。`
-  );
-  readingEl.innerHTML = renderMarkdownLite(text);
-  btn.disabled = false;
+  const btn = document.getElementById("tarotBtn");
+
+  readingEl.innerHTML = `<span class="placeholder">抽牌結果將顯示於此</span>`;
+  btn.disabled = true;
+
+  // 洗牌動畫：先讓牌背抖動一下，營造「洗牌」的臨場感
+  const shuffleHtml = drawn.map(()=>`
+    <div class="tarot-flip-wrap shuffling">
+      <div class="tarot-flip-inner">
+        <div class="tarot-flip-face tarot-flip-back">
+          <div class="rune">✦</div>
+        </div>
+      </div>
+    </div>`).join("");
+  cardsWrap.innerHTML = shuffleHtml;
+
+  setTimeout(()=>{
+    // 洗牌結束，換成可點擊翻開的牌背，提示使用者逐張點擊抽牌
+    const dealHtml = drawn.map((c,i)=>`
+      <div class="tarot-flip-wrap" data-index="${i}">
+        <div class="tarot-flip-inner">
+          <div class="tarot-flip-face tarot-flip-back">
+            <div class="rune">✦</div>
+            <div class="tap-hint">${c.position}／點擊翻牌</div>
+          </div>
+          <div class="tarot-flip-face tarot-flip-front">
+            <div class="pos">${c.position}</div>
+            <div class="name">${c.name}${c.reversed ? "（逆位）":"（正位）"}</div>
+            <div class="dir ${c.reversed?'rev':''}">${c.reversed ? c.rev : c.up}</div>
+          </div>
+        </div>
+      </div>`).join("");
+    cardsWrap.innerHTML = dealHtml;
+
+    let flippedCount = 0;
+    const wraps = cardsWrap.querySelectorAll(".tarot-flip-wrap");
+    wraps.forEach(wrap=>{
+      wrap.addEventListener("click", ()=>{
+        if(wrap.classList.contains("flipped")) return;
+        wrap.classList.add("flipped");
+        flippedCount++;
+        if(flippedCount === wraps.length){
+          // 三張牌都翻開後，才交給命理邏輯做綜合解讀
+          runTarotReading(q, drawn).finally(()=>{ btn.disabled = false; });
+        }
+      });
+    });
+    btn.disabled = false;
+  }, 550);
 });
 
 /* ---------------------------------------------------------
@@ -820,14 +913,30 @@ function renderWuxingChart(counts){
   const rows = ["木","火","土","金","水"].map(el=>{
     const c = counts[el];
     const pct = Math.round((c/max)*100);
+    // 長條先以寬度 0 渲染，並把目標寬度存進 data-target-width，
+    // 之後再用 requestAnimationFrame 套用，讓瀏覽器先畫出 0% 再變化到目標值，
+    // CSS 的 transition:width 才會真的「跑分」而不是一開始就直接顯示滿版。
     return `
       <div class="wuxing-row">
         <span class="wx-label" style="color:${WUXING_COLOR[el]}">${el}</span>
-        <span class="wx-track"><span class="wx-fill" style="width:${pct}%; background:${WUXING_COLOR[el]}"></span></span>
+        <span class="wx-track"><span class="wx-fill" data-target-width="${pct}" style="width:0%; background:${WUXING_COLOR[el]}"></span></span>
         <span class="wx-count">${c}</span>
       </div>`;
   }).join("");
   return rows;
+}
+
+function animateWuxingBars(container){
+  const fills = container.querySelectorAll(".wx-fill");
+  // 兩層 rAF：確保瀏覽器已經完成 0% 的初次繪製，再套用目標寬度觸發 transition
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      fills.forEach(f=>{
+        const target = f.getAttribute("data-target-width");
+        f.style.width = target + "%";
+      });
+    });
+  });
 }
 
 document.getElementById("baziBtn").addEventListener("click", async ()=>{
@@ -847,7 +956,9 @@ document.getElementById("baziBtn").addEventListener("click", async ()=>{
     <span class="chip">生肖 ${pillars.animal}</span>`;
 
   const wuxingCounts = computeWuxing(pillars);
-  document.getElementById("baziWuxing").innerHTML = renderWuxingChart(wuxingCounts);
+  const wuxingEl = document.getElementById("baziWuxing");
+  wuxingEl.innerHTML = renderWuxingChart(wuxingCounts);
+  animateWuxingBars(wuxingEl);
 
   const readingEl = document.getElementById("baziReading");
   readingEl.innerHTML = `<span class="placeholder">正在排盤演算...</span>`;
