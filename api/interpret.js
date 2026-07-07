@@ -30,14 +30,15 @@ export default async function handler(req, res) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-goog-api-key": process.env.GEMINI_API_KEY
+          "x-goog-api-key": process.env.ELVIS_API_Key
         },
         body: JSON.stringify({
           contents: [{ role: "user", parts: [{ text: prompt }] }],
           ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}),
           generationConfig: {
-            maxOutputTokens: 1000,
-            temperature: 0.9
+            maxOutputTokens: 1500,
+            temperature: 0.9,
+            thinkingConfig: { thinkingBudget: 0 }
           }
         })
       }
