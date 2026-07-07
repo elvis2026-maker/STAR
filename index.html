@@ -612,7 +612,7 @@
    - 日期：每次開啟頁面自動抓當天日期，不用手動改
    - 版次：只要在這裡改 SITE_VERSION 一個地方，footer 會自動同步
 --------------------------------------------------------- */
-const SITE_VERSION = "V5"; // 之後更新版本，只需要改這一行，例如 "V6"
+const SITE_VERSION = "V6"; // 之後更新版本，只需要改這一行，例如 "V7"
 (function initFooterMeta(){
   const now = new Date();
   const y = now.getFullYear();
@@ -928,13 +928,15 @@ function renderWuxingChart(counts){
 
 function animateWuxingBars(container){
   const fills = container.querySelectorAll(".wx-fill");
-  // 兩層 rAF：確保瀏覽器已經完成 0% 的初次繪製，再套用目標寬度觸發 transition
+  // 先強制觸發一次 reflow，確保瀏覽器「真的」畫出 0% 寬度這一格畫面，
+  // 而不是把 0%→目標值 兩次寫入合併成同一次重繪（合併就不會播放 transition）。
+  // 單純用兩層 requestAnimationFrame 在部分瀏覽器（尤其手機版 Safari／WebView）不夠可靠，
+  // 讀取 offsetWidth 會強制同步 reflow，才能確保動畫穩定播放。
+  fills.forEach(f=>{ void f.offsetWidth; });
   requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{
-      fills.forEach(f=>{
-        const target = f.getAttribute("data-target-width");
-        f.style.width = target + "%";
-      });
+    fills.forEach(f=>{
+      const target = f.getAttribute("data-target-width");
+      f.style.width = target + "%";
     });
   });
 }
@@ -989,7 +991,9 @@ const STROKE_DICT = {
   "承":8,"翰":16,"霖":16,"晴":12,"心":4,"語":14,"彤":7,"詠":12,"忻":8,"柔":9,
   "諾":16,"恩":10,"澤":17,"宇":6,"皓":12,"昀":8,"昕":8,"曜":18,"琪":12,"瑄":13,
   "萱":15,"芸":10,"筑":12,"晨":11,"熙":13,"辰":7,"宥":9,"羽":6,"璇":16,"芯":8,
-  "喬":12,"沐":8,"恬":10,"若":11,"晴":12,"苡":9,"晏":10,"愷":13,"愉":13,"珉":9
+  "喬":12,"沐":8,"恬":10,"若":11,"晴":12,"苡":9,"晏":10,"愷":13,"愉":13,"珉":9,
+  "珍":9,"維":14,"冠":9,"儀":15,"雯":12,"婉":11,"淑":12,"惠":12,"慧":15,"芳":10,
+  "玲":10,"淇":12,"筠":13,"婷":12,"靖":13,"薇":19,"蓁":14,"芷":10,"柏":9,"晉":10
 };
 function getStroke(ch){ return STROKE_DICT[ch] ?? null; }
 
@@ -1006,6 +1010,7 @@ function buildStrokeFixUI(){
   if(chars.length===0){ alert("請先輸入姓名"); return; }
   const container = document.getElementById("strokeFix");
   container.innerHTML = "";
+  container.dataset.builtFor = chars.join(""); // 記錄目前欄位是針對哪個姓名建立的
   chars.forEach((ch,i)=>{
     const known = getStroke(ch);
     const wrap = document.createElement("div");
@@ -1023,7 +1028,13 @@ function buildStrokeFixUI(){
 document.getElementById("nameBtn").addEventListener("click", async ()=>{
   const chars = allNameChars();
   if(chars.length < 2){ alert("請輸入至少姓＋名共2個字"); return; }
-  buildStrokeFixUI();
+  // 之前這裡會無條件重建欄位，導致使用者手動輸入的筆畫被清空重置。
+  // 現在只有「姓名字元跟目前欄位不一致」時（還沒按過查筆畫、或姓名被改過）才重建，
+  // 這樣使用者手動修正的筆畫數才不會被吃掉。
+  const strokeFixContainer = document.getElementById("strokeFix");
+  if(strokeFixContainer.dataset.builtFor !== chars.join("")){
+    buildStrokeFixUI();
+  }
   const inputs = document.querySelectorAll('#strokeFix input[data-char-index]');
   const strokes = [];
   let hasEmpty = false;
