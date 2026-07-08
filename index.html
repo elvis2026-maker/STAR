@@ -969,7 +969,7 @@
    - 日期：每次開啟頁面自動抓當天日期，不用手動改
    - 版次：只要在這裡改 SITE_VERSION 一個地方，footer 會自動同步
 --------------------------------------------------------- */
-const SITE_VERSION = "V22"; // 之後更新版本，只需要改這一行，例如 "V23"
+const SITE_VERSION = "V23"; // 之後更新版本，只需要改這一行，例如 "V24"
 (function initFooterMeta(){
   const now = new Date();
   const y = now.getFullYear();
@@ -1075,28 +1075,43 @@ function inlineFormat(line){
 
 /* ---------------------------------------------------------
    共用：呼叫 Claude API 產生解讀文字
+   V23 新增：如果後端回報 429（免費額度暫時滿了），會自動倒數等待後重試一到兩次，
+   不用使用者自己手動再按一次；等待中可以透過 onRetryWait(秒數, 第幾次, 總次數) 更新畫面文字。
+   後端本身也新增了回應快取、更多備援模型、以及 Groq 備援，多數情況下已經不太會走到這段重試，
+   但仍保留這層前端重試，讓「萬一真的全部都額滿」時的等待體驗更友善。
 --------------------------------------------------------- */
-async function askClaude(systemPrompt, userPrompt) {
-  try {
-    // 部署到 Vercel 後，前端和 API 會在同一個網域下，
-    // 用相對路徑 "/api/interpret" 就好，不用寫死網域，
-    // 本機用 vercel dev 測試或正式上線都不用改這一行。
-    const BACKEND_URL = "/api/interpret";
+async function askClaude(systemPrompt, userPrompt, onRetryWait) {
+  const BACKEND_URL = "/api/interpret";
+  const RETRY_WAITS_SEC = [15, 30]; // 第一次額滿等15秒重試，第二次還不行再等30秒重試
 
-    const response = await fetch(BACKEND_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ system: systemPrompt, prompt: userPrompt })
-    });
-    if (!response.ok) {
+  for (let attempt = 0; attempt <= RETRY_WAITS_SEC.length; attempt++) {
+    try {
+      const response = await fetch(BACKEND_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ system: systemPrompt, prompt: userPrompt })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.text || "（沒有取得回應，請稍後再試）";
+      }
       const err = await response.json().catch(() => ({}));
+
+      // 只有「額度暫時滿了」（429）才值得倒數重試；其他錯誤（輸入格式、伺服器沒設金鑰等）
+      // 重試也不會變好，直接把錯誤訊息回傳給使用者。
+      if (response.status === 429 && attempt < RETRY_WAITS_SEC.length) {
+        const waitSec = RETRY_WAITS_SEC[attempt];
+        for (let s = waitSec; s > 0; s--) {
+          if (onRetryWait) onRetryWait(s, attempt + 1, RETRY_WAITS_SEC.length);
+          await new Promise(r => setTimeout(r, 1000));
+        }
+        continue; // 倒數結束，重試下一輪
+      }
       return err.error || "解讀生成失敗，請稍後再試一次。";
+    } catch (e) {
+      console.error(e);
+      return "無法連線到後端服務，請確認後端伺服器是否已啟動。";
     }
-    const data = await response.json();
-    return data.text || "（沒有取得回應，請稍後再試）";
-  } catch (e) {
-    console.error(e);
-    return "無法連線到後端服務，請確認後端伺服器是否已啟動。";
   }
 }
 
@@ -1213,7 +1228,8 @@ document.getElementById("zodiacBtn").addEventListener("click", async ()=>{
   const btn = document.getElementById("zodiacBtn"); btn.disabled = true;
   const text = await askClaude(
     "你是一位溫暖、務實的占星顧問。請用繁體中文，針對使用者的星座給予具體但不誇大、不做絕對預言的運勢建議，語氣像是善解人意的朋友，並在最後提醒運勢僅供參考。控制在250字以內。",
-    `我是${sign}，我想了解關於「${focus}」的近期運勢，請給我解讀與具體建議。`
+    `我是${sign}，我想了解關於「${focus}」的近期運勢，請給我解讀與具體建議。`,
+    (sec)=>{ readingEl.innerHTML = `<span class="placeholder mystic-loading"><span class="spin-rune">✦</span> 系統忙碌中，${sec} 秒後自動重試...</span>`; }
   );
   readingEl.innerHTML = renderMarkdownLite(text);
   triggerMysticFlash(document.getElementById("zodiacResultCol"));
@@ -1310,7 +1326,8 @@ async function runTarotReading(q, drawn){
   const cardDesc = drawn.map(c=>`${c.position}：${c.name}${c.reversed?"（逆位）":"（正位）"}，關鍵字：${c.reversed?c.rev:c.up}`).join("；");
   const text = await askClaude(
     "你是一位溫和、擅長引導使用者自我反思的塔羅占卜師。請用繁體中文，依照抽到的過去／現在／未來三張牌，針對使用者的問題給予有邏輯脈絡、不做絕對斷言的解讀，並在最後給一句具體可行的建議。控制在300字以內。",
-    `我的問題是：「${q}」。抽到的牌是 -- ${cardDesc}。請為我解讀。`
+    `我的問題是：「${q}」。抽到的牌是 -- ${cardDesc}。請為我解讀。`,
+    (sec)=>{ readingEl.innerHTML = keypointsHtml + `<span class="placeholder">系統忙碌中，${sec} 秒後自動重試...</span>`; }
   );
   const quote = extractPullQuote(text);
   const quoteHtml = quote ? `<div class="reading-highlight"><span class="rh-tag">✦ 重點提示</span>${escapeHtml(quote)}</div>` : "";
@@ -1575,7 +1592,8 @@ document.getElementById("baziBtn").addEventListener("click", async ()=>{
   const btn = document.getElementById("baziBtn"); btn.disabled = true;
   const text = await askClaude(
     "你是一位穩重、用詞平實的命理顧問。使用者會給你四柱干支（簡化估算版），請用繁體中文，針對五行生剋的大方向給出個性傾向與生活建議的解讀，避免對健康、財務做絕對斷言，語氣溫和務實。控制在300字以內，並提醒這是簡化估算結果。",
-    `性別：${gender}。四柱：年柱${pillars.year}、月柱${pillars.month}、日柱${pillars.day}、時柱${pillars.hour}。五行統計：木${wuxingCounts.木}、火${wuxingCounts.火}、土${wuxingCounts.土}、金${wuxingCounts.金}、水${wuxingCounts.水}。請給我解讀，並可以呼應五行的分布狀況。`
+    `性別：${gender}。四柱：年柱${pillars.year}、月柱${pillars.month}、日柱${pillars.day}、時柱${pillars.hour}。五行統計：木${wuxingCounts.木}、火${wuxingCounts.火}、土${wuxingCounts.土}、金${wuxingCounts.金}、水${wuxingCounts.水}。請給我解讀，並可以呼應五行的分布狀況。`,
+    (sec)=>{ readingEl.innerHTML = `<span class="placeholder mystic-loading"><span class="spin-rune">✦</span> 系統忙碌中，${sec} 秒後自動重試...</span>`; }
   );
   readingEl.innerHTML = renderMarkdownLite(text);
   btn.disabled = false;
@@ -1725,7 +1743,8 @@ document.getElementById("nameBtn").addEventListener("click", async ()=>{
   const btn = document.getElementById("nameBtn"); btn.disabled = true;
   const text = await askClaude(
     "你是一位親切務實的姓名學顧問。使用者會給你五格數理（天格、人格、地格、外格、總格），請用繁體中文，針對數理組合給予個性特質與人際/事業傾向的解讀，語氣正向但不誇大，避免絕對斷言吉凶。控制在280字以內。",
-    `姓名為「${document.getElementById("nameSurname").value}${document.getElementById("nameGiven").value}」。五格數理：天格${tiange}、人格${renge}、地格${dige}、外格${waige}、總格${zongge}。請給我解讀。`
+    `姓名為「${document.getElementById("nameSurname").value}${document.getElementById("nameGiven").value}」。五格數理：天格${tiange}、人格${renge}、地格${dige}、外格${waige}、總格${zongge}。請給我解讀。`,
+    (sec)=>{ readingEl.innerHTML = `<span class="placeholder mystic-loading"><span class="spin-rune">✦</span> 系統忙碌中，${sec} 秒後自動重試...</span>`; }
   );
   readingEl.innerHTML = renderMarkdownLite(text);
   btn.disabled = false;
@@ -1940,7 +1959,8 @@ document.getElementById("ziweiBtn").addEventListener("click", async ()=>{
   const summary = summarizeZiweiForAI(astro, age);
   const text = await askClaude(
     "你是一位熟悉紫微斗數的專業命理顧問。使用者會提供完整命盤的關鍵宮位主星資料（命宮、財帛、官祿、夫妻、疾厄、福德），請用繁體中文，針對性格傾向、事業財運、感情婚姻給出整合解讀，若有提到目前所在大限，也請呼應該階段的重點。語氣沉穩、不誇大、不做絕對斷言，控制在350字以內，並在文末提醒命盤解法會因流派而略有差異，僅供參考。",
-    `性別：${gender}。${summary}`
+    `性別：${gender}。${summary}`,
+    (sec)=>{ readingEl.innerHTML = `<span class="placeholder mystic-loading"><span class="spin-rune">✦</span> 系統忙碌中，${sec} 秒後自動重試...</span>`; }
   );
   readingEl.innerHTML = renderMarkdownLite(text);
   triggerMysticFlash(document.getElementById("ziweiResultCol"));
