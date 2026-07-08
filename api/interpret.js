@@ -6,9 +6,21 @@
 // 記得到 Vercel 專案設定 → Environment Variables 加入 GEMINI_API_KEY
 // 金鑰申請網址：https://aistudio.google.com/apikey
 //
-// 免費額度模型用 gemini-2.5-flash，如果流量比較大常常撞到限額，
-// 可以把下面 MODEL 改成 "gemini-2.5-flash-lite"（免費額度上限更高，但品質略陽春）。
+// 免費額度模型用 gemini-2.5-flash 當主力（品質較好）。
+// 如果撞到限額（429／模型不存在等錯誤），會自動改用下面 FALLBACK_MODELS 清單中的模型依序繼續嘗試，
+// 因為 Google AI Studio 免費額度是「每個模型各自獨立計算」，
+// 一個模型的額度用完，換另一個模型通常還有剩餘額度可以用，等於把免費額度加總起來用。
+//
+// 【2026/07 更新】Google 在 2026 年陸續調整了免費層可用的模型：
+//   - gemini-2.0-flash / gemini-2.0-flash-lite 已在 2026/6/1 停用，不要再加進清單（一定會 404）
+//   - gemini-2.5-pro 已改為付費限定（免費層不再提供）
+//   - gemini-3.1-flash-lite、gemini-flash-latest（目前指向 Gemini 3.5 Flash）是 2026 年中新增的免費層模型，
+//     額度是「獨立計算」，所以先加進備援清單，多一個可以分攤流量的免費額度
+// 每個 Google Cloud 專案實際額度可能不同（同一個模型不同專案的每日上限不一定一樣），
+// 建議直接到 https://aistudio.google.com/rate-limit 看自己專案「目前」的即時額度，比任何文章上的數字都準。
+// 之後想再加開別的免費模型當備援，直接把模型名稱加進這個陣列即可（會依序嘗試，任何一個失敗都會自動換下一個）。
 const MODEL = "gemini-2.5-flash";
+const FALLBACK_MODELS = ["gemini-2.5-flash-lite", "gemini-3.1-flash-lite", "gemini-flash-latest"];
 
 // ---------------------------------------------------------
 // V17 新增：來源網域白名單（防止有人複製前端頁面後，直接打你的 /api/interpret 端點盜用你的 Gemini 額度）
@@ -76,9 +88,10 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "伺服器尚未設定金鑰，請聯絡網站管理員" });
   }
 
-  try {
+  // 把「呼叫某一個 Gemini 模型」包成一個函式，方便待會依序嘗試多個模型
+  async function callGeminiModel(model) {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
       {
         method: "POST",
         headers: {
@@ -96,13 +109,40 @@ export default async function handler(req, res) {
         })
       }
     );
+    return response;
+  }
+
+  try {
+    const modelsToTry = [MODEL, ...FALLBACK_MODELS];
+    let response = null;
+    let lastStatus = null;
+
+    for (let i = 0; i < modelsToTry.length; i++) {
+      const model = modelsToTry[i];
+      response = await callGeminiModel(model);
+
+      if (response.ok) {
+        if (i > 0) console.warn(`「${modelsToTry[0]}」額度已滿，已自動改用備援模型「${model}」`);
+        break;
+      }
+
+      lastStatus = response.status;
+      const errBody = await response.json().catch(() => ({}));
+      console.error(`Gemini API 錯誤（模型：${model}）：`, response.status, errBody);
+
+      // 只要清單裡還有下一個模型可以試，不管這次是什麼錯誤（額度已滿 429、
+      // 這個專案未開通該模型 403/404、模型名稱打錯或已停用 400...）都直接換下一個繼續嘗試，
+      // 這樣之後在 FALLBACK_MODELS 陣列裡新增任何模型名稱都很安全，
+      // 就算那個模型在你的專案上其實不存在／沒開通，也只是很快失敗、自動跳到下一個，不會卡住。
+      if (i < modelsToTry.length - 1) {
+        continue;
+      }
+      break;
+    }
 
     if (!response.ok) {
-      const errBody = await response.json().catch(() => ({}));
-      console.error("Gemini API 錯誤：", response.status, errBody);
-
-      // 免費額度最常見的狀況就是撞到速率限制，給使用者看得懂的訊息
-      if (response.status === 429) {
+      // 所有模型都試過了、都還是額度已滿
+      if (lastStatus === 429) {
         return res
           .status(429)
           .json({ error: "目前 AI 解讀請求太多（已達免費額度上限），請稍等一下再試一次。" });
