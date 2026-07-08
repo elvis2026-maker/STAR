@@ -531,7 +531,7 @@
   /* 塔羅互動抽牌：洗牌動畫 + 3D 翻牌（深色神秘卡面，呼應hero星象色調） */
   .tarot-hint{font-size:12px; color:var(--ink-dim); margin-bottom:10px; min-height:16px;}
   .tarot-flip-wrap{
-    flex:1 1 0; max-width:150px; min-width:78px; width:auto;
+    flex:1 1 0; max-width:180px; min-width:88px; width:auto;
     aspect-ratio:5/9; height:auto; perspective:900px; cursor:pointer;
     animation:tarotDealIn .45s cubic-bezier(.2,.8,.3,1.1) both;
   }
@@ -564,13 +564,13 @@
       linear-gradient(165deg, var(--bg-alt) 0%, var(--bg) 100%);
     transform:rotateY(180deg); font-size:12px; color:var(--starlight);
   }
-  .tarot-flip-front .pos{color:var(--gold); font-size:10px; letter-spacing:1px; margin-bottom:6px; opacity:.85;}
-  .tarot-flip-front .name{font-family:'Noto Serif TC', serif; font-size:clamp(13px,3.6vw,15px); margin-bottom:4px; color:var(--starlight);}
-  .tarot-flip-front .dir{color:#7FC4A6; font-size:11px;}
+  .tarot-flip-front .pos{color:var(--gold); font-size:clamp(11px,3vw,12px); letter-spacing:1px; margin-bottom:6px; opacity:.85;}
+  .tarot-flip-front .name{font-family:'Noto Serif TC', serif; font-size:clamp(15px,4.4vw,19px); margin-bottom:6px; color:var(--starlight); line-height:1.3;}
+  .tarot-flip-front .dir{color:#7FC4A6; font-size:clamp(12px,3.4vw,14px); line-height:1.5;}
   .tarot-flip-front .dir.rev{color:#E0918E;}
 
   /* 塔羅：card 上的 SVG 插畫（V8 新增）。逆位時只旋轉圖案，文字維持正向可讀 */
-  .tarot-icon{ width:22%; height:auto; aspect-ratio:1; margin-bottom:4px; overflow:visible; }
+  .tarot-icon{ width:26%; height:auto; aspect-ratio:1; margin-bottom:6px; overflow:visible; }
   .tarot-icon svg{ width:100%; height:100%; }
   .tarot-icon .ic-line{ fill:none; stroke:var(--gold); stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
   .tarot-icon .ic-fill{ fill:var(--gold); }
@@ -918,7 +918,7 @@
     <div class="result-col" id="ziweiResultCol" style="border-left:none; padding-left:0; margin-top:28px;">
       <div class="reading" id="ziweiReading"><span class="placeholder">AI 解讀將顯示於此</span></div>
     </div>
-    <div class="disclaimer">命盤排演算法採用開源紫微斗數排盤引擎 <a href="https://github.com/SylarLong/iztro" target="_blank" rel="noopener">iztro</a>，星曜亮度／四化／大限採該引擎預設流派設定，不同派別（如三合派、飛星派）解法可能略有差異，命盤僅供命理參考，非絕對論斷依據。</div>
+    <div class="disclaimer">星曜亮度／四化／大限採用命盤預設流派設定，不同派別（如三合派、飛星派）解法可能略有差異，命盤僅供命理參考，非絕對論斷依據。</div>
   </section>
 
 </main>
@@ -969,7 +969,7 @@
    - 日期：每次開啟頁面自動抓當天日期，不用手動改
    - 版次：只要在這裡改 SITE_VERSION 一個地方，footer 會自動同步
 --------------------------------------------------------- */
-const SITE_VERSION = "V18"; // 之後更新版本，只需要改這一行，例如 "V19"
+const SITE_VERSION = "V20"; // 之後更新版本，只需要改這一行，例如 "V21"
 (function initFooterMeta(){
   const now = new Date();
   const y = now.getFullYear();
