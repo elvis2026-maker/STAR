@@ -179,7 +179,7 @@
   /* tool nav tabs */
   .tool-bar{
     display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
-    padding:0 6vw 40px; max-width:1100px; margin:0 auto;
+    padding:0 6vw 40px; max-width:1320px; margin:0 auto;
   }
   .tool-tab{
     border:1px solid var(--line); background:var(--panel); color:var(--starlight-dim);
@@ -190,7 +190,7 @@
     background:var(--violet); color:var(--starlight); border-color:var(--violet-soft);
   }
 
-  main{max-width:1100px; margin:0 auto; padding:0 6vw 100px;}
+  main{max-width:1320px; margin:0 auto; padding:0 6vw 100px;}
   .panel{
     display:none;
     background:linear-gradient(165deg, var(--paper) 0%, var(--paper-alt) 100%);
@@ -377,6 +377,9 @@
   .panel-ziwei .zw-field-btn .btn{ margin-top:0; }
   .panel-ziwei label{ margin-top:0; }
 
+  /* 紫微命盤：桌機（>900px）欄寬用 minmax(0,1fr) 平均分配容器寬度，一次看到全部 12 宮，不用左右滑動。
+     手機／平板（<=900px）螢幕太窄，硬擠 4 欄字會小到看不清楚，維持原本「固定最小寬度＋左右滑動＋點擊放大」的做法。
+     容器本身的寬度加大，另見 main{max-width} 的調整。 */
   .ziwei-chart-scroll{
     overflow-x:auto; margin:22px 0 6px; padding-bottom:6px;
   }
@@ -385,15 +388,26 @@
   }
   .ziwei-chart{
     display:grid;
-    grid-template-columns: repeat(4, minmax(175px, 1fr));
-    grid-template-rows: repeat(4, minmax(140px, auto));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(150px, auto));
     grid-template-areas:
       "c0  c1  c2  c3"
       "c11 ct  ct  c4"
       "c10 ct  ct  c5"
       "c9  c8  c7  c6";
-    gap:7px;
-    min-width:880px;
+    gap:9px;
+  }
+  @media (max-width:900px){
+    .ziwei-chart{
+      grid-template-columns: repeat(4, minmax(175px, 1fr));
+      grid-template-rows: repeat(4, minmax(140px, auto));
+      gap:7px;
+      min-width:880px;
+    }
+  }
+  /* 桌機（>900px）已經放得下整個命盤，不需要再提示可以左右滑動 */
+  @media (min-width:901px){
+    .ziwei-chart-hint{ display:none !important; }
   }
   .zw-placeholder{
     grid-column:1/-1; text-align:center; padding:60px 0; color:var(--gold-deep-dim);
@@ -955,7 +969,7 @@
    - 日期：每次開啟頁面自動抓當天日期，不用手動改
    - 版次：只要在這裡改 SITE_VERSION 一個地方，footer 會自動同步
 --------------------------------------------------------- */
-const SITE_VERSION = "V17"; // 之後更新版本，只需要改這一行，例如 "V18"
+const SITE_VERSION = "V18"; // 之後更新版本，只需要改這一行，例如 "V19"
 (function initFooterMeta(){
   const now = new Date();
   const y = now.getFullYear();
