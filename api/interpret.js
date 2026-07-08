@@ -10,9 +10,56 @@
 // 可以把下面 MODEL 改成 "gemini-2.5-flash-lite"（免費額度上限更高，但品質略陽春）。
 const MODEL = "gemini-2.5-flash";
 
+// ---------------------------------------------------------
+// V17 新增：來源網域白名單（防止有人複製前端頁面後，直接打你的 /api/interpret 端點盜用你的 Gemini 額度）
+// 到 Vercel → Environment Variables 新增 ALLOWED_ORIGIN，值設為你正式網站網址，
+// 例如 https://star-seven-tan.vercel.app（有自訂網域就填自訂網域，不要有結尾斜線）。
+// 沒設定這個環境變數時，這道檢查會自動跳過（不會擋到你自己），但強烈建議設定。
+// ---------------------------------------------------------
+function isAllowedOrigin(req) {
+  const allowed = (process.env.ALLOWED_ORIGIN || "").trim().replace(/\/$/, "");
+  if (!allowed) return true; // 尚未設定白名單，先不擋（避免自己被鎖住）
+  const origin = (req.headers.origin || "").replace(/\/$/, "");
+  const referer = (req.headers.referer || "");
+  if (origin && origin === allowed) return true;
+  if (!origin && referer.startsWith(allowed)) return true; // 少數瀏覽器情境不帶 origin，退而求其次比對 referer
+  return false;
+}
+
+// ---------------------------------------------------------
+// V17 新增：簡易頻率限制（同一個 IP 在時間窗口內的請求數上限）
+// 註：Vercel 的 Serverless Function 每個執行環境是獨立的，記憶體不會跨執行個體共享，
+// 高流量時效果會打折扣；這只能擋掉單機腳本猛刷的狀況，不是完整的防護方案。
+// 若之後流量變大、想要更可靠的限制，建議改接 Vercel KV 或 Upstash Redis 做跨執行個體計數。
+// ---------------------------------------------------------
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 分鐘
+const RATE_LIMIT_MAX = 20; // 同一 IP 10 分鐘內最多 20 次請求
+const rateLimitStore = globalThis.__miliRateLimitStore || (globalThis.__miliRateLimitStore = new Map());
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const record = rateLimitStore.get(ip);
+  if (!record || now > record.resetAt) {
+    rateLimitStore.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  record.count += 1;
+  if (record.count > RATE_LIMIT_MAX) return false;
+  return true;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "只接受 POST 請求" });
+  }
+
+  if (!isAllowedOrigin(req)) {
+    console.warn("被拒絕的來源請求：", req.headers.origin || req.headers.referer);
+    return res.status(403).json({ error: "不允許的來源" });
+  }
+
+  const clientIp = (req.headers["x-forwarded-for"] || "").split(",")[0].trim() || req.socket?.remoteAddress || "unknown";
+  if (!checkRateLimit(clientIp)) {
+    return res.status(429).json({ error: "請求太頻繁，請稍後再試。" });
   }
 
   const { system, prompt } = req.body || {};
@@ -24,12 +71,10 @@ export default async function handler(req, res) {
   }
 
   const rawKey = process.env.GEMINI_API_KEY || "";
-  console.log("金鑰診斷：", JSON.stringify({
-    length: rawKey.length,
-    head: rawKey.slice(0, 6),
-    tail: rawKey.slice(-6),
-    hasWhitespace: /\s/.test(rawKey)
-  }));
+  if (!rawKey) {
+    console.error("GEMINI_API_KEY 尚未設定");
+    return res.status(500).json({ error: "伺服器尚未設定金鑰，請聯絡網站管理員" });
+  }
 
   try {
     const response = await fetch(
