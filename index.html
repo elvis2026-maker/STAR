@@ -222,6 +222,12 @@
     width:100%; background:rgba(255,255,255,0.55); border:1px solid var(--paper-line); color:var(--ink);
     padding:11px 14px; border-radius:10px; font-family:'Noto Sans TC',sans-serif; font-size:14px;
   }
+  input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active{
+    -webkit-text-fill-color:var(--ink);
+    box-shadow:0 0 0 1000px rgba(255,255,255,0.55) inset;
+    -webkit-box-shadow:0 0 0 1000px rgba(255,255,255,0.55) inset;
+    transition:background-color 9999s ease-in-out 0s;
+  }
   textarea{min-height:80px; resize:vertical;}
   .field-hint{font-size:12px; color:var(--ink-dim); margin:-2px 0 0; opacity:0.85;}
   .field-hint.field-hint-error{color:#b23b3b;}
@@ -327,7 +333,7 @@
     .wuge-line, .wuge-node{ animation:none; opacity:1; stroke-dashoffset:0; transform:scale(1); }
   }
   .reading{
-    white-space:normal; font-size:15.5px; line-height:1.9; color:var(--ink); min-height:60px;
+    white-space:normal; font-size:15.5px; line-height:1.9; color:var(--ink); font-weight:400; min-height:60px;
   }
   .reading p{ margin:0 0 16px; }
   .reading p:last-child{ margin-bottom:0; }
@@ -361,7 +367,143 @@
   .wuxing-legend span{ display:inline-flex; align-items:center; gap:4px; }
   .wuxing-legend i{ width:8px; height:8px; border-radius:50%; display:inline-block; }
 
-  .tarot-cards{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px; min-height:150px;}
+  /* 紫微斗數：全盤命盤（V11 起改用 iztro 排盤引擎，畫出完整十二宮） */
+  .panel-ziwei .ziwei-input-row{
+    display:flex; flex-wrap:wrap; gap:18px; align-items:flex-start; margin-bottom:8px;
+  }
+  .panel-ziwei .zw-field{ flex:1 1 200px; min-width:150px; }
+  .panel-ziwei .zw-field-gender{ flex:0 1 110px; min-width:100px; }
+  .panel-ziwei .zw-field-btn{ flex:0 1 220px; min-width:180px; }
+  .panel-ziwei .zw-field-btn .btn{ margin-top:0; }
+  .panel-ziwei label{ margin-top:0; }
+
+  .ziwei-chart-scroll{
+    overflow-x:auto; margin:22px 0 6px; padding-bottom:6px;
+  }
+  .ziwei-chart-hint{
+    font-size:11.5px; color:var(--gold-deep-dim); text-align:center; margin-top:2px;
+  }
+  .ziwei-chart{
+    display:grid;
+    grid-template-columns: repeat(4, minmax(175px, 1fr));
+    grid-template-rows: repeat(4, minmax(140px, auto));
+    grid-template-areas:
+      "c0  c1  c2  c3"
+      "c11 ct  ct  c4"
+      "c10 ct  ct  c5"
+      "c9  c8  c7  c6";
+    gap:7px;
+    min-width:880px;
+  }
+  .zw-placeholder{
+    grid-column:1/-1; text-align:center; padding:60px 0; color:var(--gold-deep-dim);
+    font-size:13px; font-style:italic;
+  }
+  .zw-cell{
+    border:1px solid var(--paper-line); border-radius:8px;
+    background:rgba(255,255,255,0.4);
+    padding:9px 10px; display:flex; flex-direction:column; gap:6px;
+    font-size:12.5px; color:var(--ink-dim); position:relative; min-height:0;
+    opacity:0; animation:zwCellIn .45s ease forwards;
+    cursor:pointer; transition:background .15s, transform .15s, box-shadow .15s;
+  }
+  .zw-cell:hover, .zw-cell:active{
+    background:rgba(255,255,255,0.75); transform:translateY(-1px);
+    box-shadow:0 6px 16px rgba(43,36,24,0.12);
+  }
+  .zw-cell::after{
+    content:"⤢"; position:absolute; top:6px; right:6px; font-size:11px;
+    color:var(--gold-deep-dim); opacity:0.5;
+  }
+  @keyframes zwCellIn{ from{opacity:0; transform:scale(.96);} to{opacity:1; transform:scale(1);} }
+  .zw-cell.is-shen{ box-shadow:inset 0 0 0 1.5px var(--violet); }
+  .zw-cell.is-ming{ background:rgba(166,124,61,0.12); box-shadow:inset 0 0 0 1.5px var(--gold-deep); }
+  .zw-cell.is-ming:hover, .zw-cell.is-ming:active{ background:rgba(166,124,61,0.22); }
+  .zw-top{ display:flex; justify-content:space-between; align-items:baseline; font-family:'Space Mono',monospace; font-size:11px; color:var(--gold-deep-dim); padding-right:14px; }
+  .zw-palace-name{ font-family:'Noto Serif TC',serif; font-weight:700; font-size:14.5px; color:var(--ink); }
+  .zw-badge{
+    font-size:10px; padding:1px 7px; border-radius:999px; letter-spacing:1px;
+    background:var(--gold-deep); color:var(--paper); font-weight:700;
+  }
+  .zw-cell.is-shen .zw-badge.shen{ background:var(--violet); }
+  .zw-majors{ display:flex; flex-direction:column; gap:3px; }
+  .zw-star-line{ display:flex; align-items:baseline; gap:4px; flex-wrap:wrap; }
+  .zw-star-major{ font-family:'Noto Serif TC',serif; font-weight:700; font-size:14.5px; color:var(--ink); }
+  .zw-bright{ font-size:10.5px; color:var(--ink-dim); }
+  .zw-mutagen{
+    font-size:10px; font-weight:700; width:15px; height:15px; line-height:15px; text-align:center;
+    border-radius:50%; color:#fff; display:inline-block;
+  }
+  .zw-mutagen.m-lu{ background:var(--jade); }
+  .zw-mutagen.m-quan{ background:var(--violet); }
+  .zw-mutagen.m-ke{ background:var(--gold-deep); }
+  .zw-mutagen.m-ji{ background:var(--cinnabar); }
+  .zw-minors{ display:flex; flex-wrap:wrap; gap:4px 7px; font-size:11px; }
+  .zw-minor.aux{ color:var(--jade); }
+  .zw-minor.sha{ color:var(--cinnabar); }
+  .zw-minor.ma{ color:var(--ink-dim); }
+  .zw-adj{ font-size:10px; color:var(--ink-dim); opacity:0.75; line-height:1.5; }
+  .zw-foot{
+    margin-top:auto; display:flex; justify-content:space-between; align-items:center;
+    font-family:'Space Mono',monospace; font-size:10.5px; color:var(--gold-deep-dim); border-top:1px dashed var(--paper-line); padding-top:5px;
+  }
+  .zw-foot .zw-ages{ opacity:0.75; max-width:70%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .zw-center{
+    grid-area:ct; border:1px solid var(--paper-line); border-radius:10px;
+    background:linear-gradient(165deg, rgba(255,255,255,0.55), rgba(255,255,255,0.25));
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; gap:6px; padding:14px;
+  }
+  .zw-center .zw-center-title{ font-family:'Noto Serif TC',serif; font-weight:900; font-size:19px; color:var(--gold-deep); letter-spacing:2px; }
+  .zw-center-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:4px 18px; font-size:12px; color:var(--ink-dim); text-align:left;
+  }
+  .zw-center-grid b{ color:var(--ink); font-weight:700; }
+  @media (max-width:640px){
+    .zw-center .zw-center-title{ font-size:16px; }
+    .zw-center-grid{ font-size:10.5px; gap:3px 12px; }
+  }
+
+  /* 命盤放大檢視：點/點選任一宮位跳出的大視窗 */
+  .zw-modal-overlay{
+    position:fixed; inset:0; background:rgba(20,18,43,0.68);
+    display:flex; align-items:center; justify-content:center;
+    padding:24px; z-index:200; opacity:0; pointer-events:none;
+    transition:opacity .2s;
+  }
+  .zw-modal-overlay.open{ opacity:1; pointer-events:auto; }
+  .zw-modal{
+    background:linear-gradient(165deg, var(--paper) 0%, var(--paper-alt) 100%);
+    border:1px solid var(--paper-line); border-radius:16px;
+    max-width:480px; width:100%; max-height:85vh; overflow-y:auto;
+    padding:26px 26px 22px; position:relative;
+    box-shadow:0 30px 80px rgba(0,0,0,0.4);
+    transform:scale(.94) translateY(8px); transition:transform .22s;
+  }
+  .zw-modal-overlay.open .zw-modal{ transform:scale(1) translateY(0); }
+  .zw-modal-close{
+    position:absolute; top:14px; right:16px; width:30px; height:30px; border-radius:50%;
+    border:1px solid var(--paper-line); background:rgba(255,255,255,0.5); color:var(--ink-dim);
+    font-size:16px; cursor:pointer; line-height:1;
+  }
+  .zw-modal-top{ font-family:'Space Mono',monospace; font-size:13px; color:var(--gold-deep-dim); margin-bottom:2px; }
+  .zw-modal-title{ font-family:'Noto Serif TC',serif; font-weight:900; font-size:26px; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+  .zw-modal-badges{ margin-bottom:14px; display:flex; gap:6px; }
+  .zw-modal-section-label{ font-size:11px; letter-spacing:2px; color:var(--gold-deep-dim); margin:16px 0 6px; text-transform:uppercase; }
+  .zw-modal-majors{ display:flex; flex-direction:column; gap:8px; }
+  .zw-modal-star-line{ display:flex; align-items:baseline; gap:8px; font-size:19px; font-family:'Noto Serif TC',serif; font-weight:700; color:var(--ink); }
+  .zw-modal-star-line .zw-bright{ font-size:13px; }
+  .zw-modal-star-line .zw-mutagen{ width:20px; height:20px; line-height:20px; font-size:12px; }
+  .zw-modal-minors, .zw-modal-adj{ font-size:14px; line-height:1.9; }
+  .zw-modal-empty{ color:var(--ink-dim); opacity:.6; font-size:14px; font-style:italic; }
+  .zw-modal-foot{
+    margin-top:18px; padding-top:14px; border-top:1px dashed var(--paper-line);
+    font-size:13px; color:var(--ink-dim); display:flex; flex-direction:column; gap:4px;
+  }
+
+
+  .tarot-cards{display:flex; gap:14px; flex-wrap:nowrap; margin-bottom:16px; min-height:150px; justify-content:center;}
   .tarot-card{
     width:100px; padding:14px 10px; border:1px solid var(--gold-deep); border-radius:10px;
     text-align:center; background:linear-gradient(160deg, rgba(166,124,61,0.10), transparent);
@@ -372,10 +514,11 @@
   .tarot-card .dir{color:var(--jade); font-size:11px;}
   .tarot-card .dir.rev{color:var(--cinnabar);}
 
-  /* 塔羅互動抽牌：洗牌動畫 + 3D 翻牌 */
+  /* 塔羅互動抽牌：洗牌動畫 + 3D 翻牌（深色神秘卡面，呼應hero星象色調） */
   .tarot-hint{font-size:12px; color:var(--ink-dim); margin-bottom:10px; min-height:16px;}
   .tarot-flip-wrap{
-    width:100px; height:150px; perspective:900px; cursor:pointer;
+    flex:1 1 0; max-width:150px; min-width:78px; width:auto;
+    aspect-ratio:5/9; height:auto; perspective:900px; cursor:pointer;
     animation:tarotDealIn .45s cubic-bezier(.2,.8,.3,1.1) both;
   }
   .tarot-flip-wrap.shuffling{ animation:tarotShuffle .55s ease-in-out; }
@@ -389,33 +532,42 @@
   .tarot-flip-wrap.flipped .tarot-flip-inner{ transform:rotateY(180deg); }
   .tarot-flip-face{
     position:absolute; inset:0; backface-visibility:hidden; border-radius:10px;
-    border:1px solid var(--gold-deep); display:flex; flex-direction:column;
-    align-items:center; justify-content:center; padding:10px;
+    border:1px solid var(--gold); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; padding:8% 6%;
+    box-shadow:0 6px 18px rgba(20,18,43,0.35);
   }
   .tarot-flip-back{
     background:
-      repeating-linear-gradient(45deg, rgba(166,124,61,0.16) 0 6px, rgba(166,124,61,0.05) 6px 12px),
-      linear-gradient(160deg, var(--paper), var(--paper-alt));
+      repeating-linear-gradient(45deg, rgba(201,169,97,0.14) 0 6px, rgba(201,169,97,0.03) 6px 12px),
+      radial-gradient(ellipse at 50% 30%, var(--violet-soft) 0%, transparent 70%),
+      linear-gradient(160deg, var(--bg-alt), var(--bg));
   }
-  .tarot-flip-back .rune{font-family:'Noto Serif TC',serif; font-size:22px; color:var(--gold-deep); opacity:.8;}
-  .tarot-flip-back .tap-hint{font-size:10px; color:var(--gold-deep-dim); margin-top:8px; letter-spacing:1px;}
+  .tarot-flip-back .rune{font-family:'Noto Serif TC',serif; font-size:clamp(18px,6vw,24px); color:var(--gold); opacity:.9;}
+  .tarot-flip-back .tap-hint{font-size:10px; color:var(--starlight-dim); margin-top:8px; letter-spacing:1px;}
   .tarot-flip-front{
-    background:linear-gradient(160deg, rgba(166,124,61,0.10), var(--paper));
-    transform:rotateY(180deg); font-size:12px; color:var(--ink);
+    background:
+      radial-gradient(ellipse at 50% 20%, var(--violet-soft) 0%, transparent 65%),
+      linear-gradient(165deg, var(--bg-alt) 0%, var(--bg) 100%);
+    transform:rotateY(180deg); font-size:12px; color:var(--starlight);
   }
-  .tarot-flip-front .pos{color:var(--gold-deep-dim); font-size:10px; letter-spacing:1px; margin-bottom:6px;}
-  .tarot-flip-front .name{font-family:'Noto Serif TC', serif; font-size:14px; margin-bottom:4px;}
-  .tarot-flip-front .dir{color:var(--jade); font-size:11px;}
-  .tarot-flip-front .dir.rev{color:var(--cinnabar);}
+  .tarot-flip-front .pos{color:var(--gold); font-size:10px; letter-spacing:1px; margin-bottom:6px; opacity:.85;}
+  .tarot-flip-front .name{font-family:'Noto Serif TC', serif; font-size:clamp(13px,3.6vw,15px); margin-bottom:4px; color:var(--starlight);}
+  .tarot-flip-front .dir{color:#7FC4A6; font-size:11px;}
+  .tarot-flip-front .dir.rev{color:#E0918E;}
 
   /* 塔羅：card 上的 SVG 插畫（V8 新增）。逆位時只旋轉圖案，文字維持正向可讀 */
-  .tarot-icon{ width:40px; height:40px; margin-bottom:4px; overflow:visible; }
+  .tarot-icon{ width:22%; height:auto; aspect-ratio:1; margin-bottom:4px; overflow:visible; }
   .tarot-icon svg{ width:100%; height:100%; }
-  .tarot-icon .ic-line{ fill:none; stroke:var(--gold-deep); stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
-  .tarot-icon .ic-fill{ fill:var(--gold-deep); }
+  .tarot-icon .ic-line{ fill:none; stroke:var(--gold); stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
+  .tarot-icon .ic-fill{ fill:var(--gold); }
   .tarot-flip-front.rev .tarot-icon svg{ transform:rotate(180deg); }
-  .tarot-flip-front.rev .ic-line{ stroke:var(--cinnabar); }
-  .tarot-flip-front.rev .ic-fill{ fill:var(--cinnabar); }
+  .tarot-flip-front.rev .ic-line{ stroke:#E0918E; }
+  .tarot-flip-front.rev .ic-fill{ fill:#E0918E; }
+
+  @media (max-width:640px){
+    .tarot-cards{ gap:8px; }
+    .tarot-flip-wrap{ max-width:none; min-width:0; }
+  }
 
   /* 塔羅：抽牌重點特寫卡（V8 新增）——把三張牌的關鍵字獨立「特寫」出來，
      跟下方 AI 完整解讀分開，方便使用者一眼抓到重點 */
@@ -441,7 +593,7 @@
   /* 星座：結果 SVG 星座圖（V10 新增）——生成解讀時顯示對應星座符號，
      外圈金色刻度環與紫色內環分別以不同速度旋轉，符號本身淡入放大 */
   .zodiac-glyph-wrap{
-    width:118px; height:118px; margin:0 auto 14px; overflow:visible;
+    width:148px; height:148px; margin:0 auto 14px; overflow:visible;
   }
   .zodiac-glyph-wrap svg{ width:100%; height:100%; overflow:visible; }
   .zg-ring{
@@ -460,8 +612,8 @@
     transform-origin:50px 50px;
     animation:zgReveal .9s cubic-bezier(.2,.8,.3,1.1) both;
   }
-  .zg-glyph .ic-line{ fill:none; stroke:var(--gold-deep); stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
-  .zg-glyph .ic-fill{ fill:var(--gold-deep); }
+  .zg-glyph .ic-line{ fill:none; stroke:currentColor; stroke-width:5.5; stroke-linecap:round; stroke-linejoin:round; }
+  .zg-glyph .ic-fill{ fill:currentColor; }
   @keyframes zgReveal{
     from{ opacity:0; transform:scale(.5) rotate(-25deg); }
     to{ opacity:1; transform:scale(1) rotate(0deg); }
@@ -708,36 +860,51 @@
   </section>
 
   <!-- ===================== 紫微斗數 ===================== -->
-  <section class="panel" id="ziwei" data-index="05 / ZIWEI">
-    <h2>紫微斗數（簡化命宮估算）</h2>
-    <div class="sub">輸入農曆出生月份與時辰，估算命宮落點</div>
-    <div class="grid">
-      <div>
-        <label>農曆出生月份（1～12）</label>
-        <input type="number" id="ziweiMonth" min="1" max="12" placeholder="例如：7">
-        <label>出生時辰</label>
-        <select id="ziweiHour">
-          <option value="23">子時（23:00–00:59）</option>
-          <option value="1">丑時（01:00–02:59）</option>
-          <option value="3">寅時（03:00–04:59）</option>
-          <option value="5">卯時（05:00–06:59）</option>
-          <option value="7">辰時（07:00–08:59）</option>
-          <option value="9">巳時（09:00–10:59）</option>
-          <option value="11" selected>午時（11:00–12:59）</option>
-          <option value="13">未時（13:00–14:59）</option>
-          <option value="15">申時（15:00–16:59）</option>
-          <option value="17">酉時（17:00–18:59）</option>
-          <option value="19">戌時（19:00–20:59）</option>
-          <option value="21">亥時（21:00–22:59）</option>
-        </select>
-        <button class="btn" id="ziweiBtn">估算命宮並生成解讀</button>
+  <section class="panel panel-ziwei" id="ziwei" data-index="05 / ZIWEI">
+    <h2>紫微斗數 全盤命盤</h2>
+    <div class="sub">輸入國曆出生日期時間與性別，排出完整十二宮紫微命盤（含十四主星、輔星煞星、大限）</div>
+
+    <div class="ziwei-input-row">
+      <div class="zw-field">
+        <label>國曆出生日期</label>
+        <input type="text" id="ziweiDate" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="例如 19990101">
+        <div class="field-hint" id="ziweiDateHint">直接輸入 8 碼數字，例如 19990101 代表 1999年01月01日</div>
       </div>
-      <div class="result-col" id="ziweiResultCol">
-        <div class="structured" id="ziweiChips"></div>
-        <div class="reading" id="ziweiReading"><span class="placeholder">結果將顯示於此</span></div>
-        <div class="disclaimer">完整紫微斗數需排出十四主星與十二宮全盤，本原型僅估算命宮地支位置作為命理解析依據，尚未實作完整排盤，之後可串接專業排盤引擎補強。</div>
+      <div class="zw-field zw-field-time">
+        <label>出生時間</label>
+        <div class="time-select-row">
+          <select id="ziweiHour"></select>
+          <span class="time-colon">：</span>
+          <select id="ziweiMinute"></select>
+        </div>
+      </div>
+      <div class="zw-field zw-field-gender">
+        <label>性別</label>
+        <select id="ziweiGender"><option value="女">女</option><option value="男">男</option></select>
+      </div>
+      <div class="zw-field zw-field-btn">
+        <label>&nbsp;</label>
+        <button class="btn" id="ziweiBtn">排出命盤並生成解讀</button>
       </div>
     </div>
+
+    <div class="structured" id="ziweiChips"></div>
+
+    <div class="ziwei-chart-scroll">
+      <div class="ziwei-chart" id="ziweiChart">
+        <div class="zw-placeholder">輸入資料後，命盤將顯示於此</div>
+      </div>
+    </div>
+    <div class="ziwei-chart-hint" id="ziweiChartHint" style="display:none;">💡 手機螢幕較小，字看不清楚可以左右滑動找到想看的宮位，點一下該宮位可以放大查看完整內容</div>
+
+    <div class="zw-modal-overlay" id="zwModalOverlay">
+      <div class="zw-modal" id="zwModal" role="dialog" aria-modal="true"></div>
+    </div>
+
+    <div class="result-col" id="ziweiResultCol" style="border-left:none; padding-left:0; margin-top:28px;">
+      <div class="reading" id="ziweiReading"><span class="placeholder">AI 解讀將顯示於此</span></div>
+    </div>
+    <div class="disclaimer">命盤排演算法採用開源紫微斗數排盤引擎 <a href="https://github.com/SylarLong/iztro" target="_blank" rel="noopener">iztro</a>，星曜亮度／四化／大限採該引擎預設流派設定，不同派別（如三合派、飛星派）解法可能略有差異，命盤僅供命理參考，非絕對論斷依據。</div>
   </section>
 
 </main>
@@ -759,6 +926,8 @@
   </div>
 </footer>
 
+<!-- 紫微斗數排盤引擎（開源套件 iztro，MIT License：https://github.com/SylarLong/iztro）-->
+<script src="vendor/iztro.min.js"></script>
 <script>
 /* ---------------------------------------------------------
    星空背景：動態產生閃爍星點
@@ -786,7 +955,7 @@
    - 日期：每次開啟頁面自動抓當天日期，不用手動改
    - 版次：只要在這裡改 SITE_VERSION 一個地方，footer 會自動同步
 --------------------------------------------------------- */
-const SITE_VERSION = "V10"; // 之後更新版本，只需要改這一行，例如 "V11"
+const SITE_VERSION = "V16"; // 之後更新版本，只需要改這一行，例如 "V17"
 (function initFooterMeta(){
   const now = new Date();
   const y = now.getFullYear();
@@ -837,6 +1006,14 @@ function populateTimeSelect(select, max, step, defaultVal){
     select.appendChild(opt);
   }
 }
+// 紫微斗數的時辰是「早子時(00:00-01:00)」到「晚子時(23:00-24:00)」共 13 個區段（子時被拆成早晚兩段）
+// iztro 需要的 timeIndex：0=早子 1=丑 2=寅...11=亥 12=晚子
+function hourMinuteToTimeIndex(hh, mm){
+  const totalMin = hh*60 + mm;
+  if(totalMin < 60) return 0;
+  if(totalMin >= 23*60) return 12;
+  return Math.floor((totalMin - 60) / 120) + 1;
+}
 (function initBaziTimeSelects(){
   const hourSel = document.getElementById("baziHour");
   const minSel = document.getElementById("baziMinute");
@@ -844,9 +1021,16 @@ function populateTimeSelect(select, max, step, defaultVal){
     populateTimeSelect(hourSel, 24, 1, 12);
     populateTimeSelect(minSel, 60, 5, 0);
   }
+  const zwHourSel = document.getElementById("ziweiHour");
+  const zwMinSel = document.getElementById("ziweiMinute");
+  if(zwHourSel && zwMinSel){
+    populateTimeSelect(zwHourSel, 24, 1, 12);
+    populateTimeSelect(zwMinSel, 60, 5, 0);
+  }
 })();
 attachDateAutoFormat(document.getElementById("zodiacDate"), document.getElementById("zodiacDateHint"), "直接輸入 8 碼數字，例如 19990101 代表 1999年01月01日");
 attachDateAutoFormat(document.getElementById("baziDate"), document.getElementById("baziDateHint"), "直接輸入 8 碼數字，例如 19990101 代表 1999年01月01日");
+attachDateAutoFormat(document.getElementById("ziweiDate"), document.getElementById("ziweiDateHint"), "直接輸入 8 碼數字，例如 19990101 代表 1999年01月01日");
 
 /* ---------------------------------------------------------
    共用：把 AI 回傳的輕量 markdown（**粗體**、換行、簡單列點）
@@ -970,21 +1154,21 @@ function getZodiac(month, day){
    - renderZodiacGlyph() 會把符號套進帶有雙圈刻度環與星芒的完整 SVG
 --------------------------------------------------------- */
 const ZODIAC_ICONS = {
-  "牡羊座": `<path class="ic-line" d="M30 70 C18 45,26 16,50 32 C74 16,82 45,70 70 M50 32 L50 82"/>`,
-  "金牛座": `<circle class="ic-line" cx="50" cy="64" r="19"/><path class="ic-line" d="M26 44 C16 20,36 8,50 28 C64 8,84 20,74 44"/>`,
-  "雙子座": `<path class="ic-line" d="M20 20 L80 20 M20 80 L80 80 M32 20 L32 80 M68 20 L68 80"/>`,
-  "巨蟹座": `<path class="ic-line" d="M30 35 A15 15 0 1 1 30 65 M70 65 A15 15 0 1 1 70 35"/><circle class="ic-fill" cx="30" cy="35" r="4"/><circle class="ic-fill" cx="70" cy="65" r="4"/>`,
-  "獅子座": `<circle class="ic-line" cx="36" cy="56" r="17"/><path class="ic-line" d="M50 46 C64 34,82 42,76 58 C92 54,86 76,68 70"/>`,
-  "處女座": `<path class="ic-line" d="M25 20 L25 60 C25 74,39 74,39 60 L39 20 M39 20 L39 60 C39 74,53 74,53 60 L53 30 M53 30 L53 70 C53 84,72 84,72 66 C72 57,58 57,58 66"/>`,
-  "天秤座": `<path class="ic-line" d="M20 20 L80 20"/><path class="ic-line" d="M26 42 A24 18 0 0 0 74 42"/><path class="ic-line" d="M20 78 L80 78"/>`,
-  "天蠍座": `<path class="ic-line" d="M25 20 L25 58 C25 72,39 72,39 58 L39 20 M39 20 L39 58 C39 72,53 72,53 58 L53 30 M53 30 L53 68 L73 68 M65 60 L73 68 L65 76"/>`,
-  "射手座": `<path class="ic-line" d="M24 76 L76 24 M54 20 L80 20 L80 46 M34 54 L54 74"/>`,
-  "摩羯座": `<path class="ic-line" d="M24 22 C14 12,34 8,34 22 L34 56 C34 70,52 70,52 56 C52 46,42 46,42 56 C42 66,58 66,64 56 C74 40,90 54,80 70 C75 78,66 78,66 70"/>`,
-  "水瓶座": `<path class="ic-line" d="M14 36 L28 46 L42 36 L56 46 L70 36 L84 46 M14 62 L28 72 L42 62 L56 72 L70 62 L84 72"/>`,
-  "雙魚座": `<path class="ic-line" d="M30 18 C10 40,10 60,30 82 M70 18 C90 40,90 60,70 82 M14 50 L86 50"/>`
+  "牡羊座": {color:"#E15B4A", path:`<path class="ic-line" d="M22 78 C8 46,18 8,50 28 C82 8,92 46,78 78 M50 28 L50 90"/>`},
+  "金牛座": {color:"#4C9F6E", path:`<circle class="ic-line" cx="50" cy="62" r="24"/><path class="ic-line" d="M20 36 C8 8,34 -6,50 20 C66 -6,92 8,80 36"/>`},
+  "雙子座": {color:"#E0AF3C", path:`<path class="ic-line" d="M14 14 L86 14 M14 86 L86 86 M28 14 L28 86 M72 14 L72 86"/>`},
+  "巨蟹座": {color:"#4C93D9", path:`<path class="ic-line" d="M26 30 A19 19 0 1 1 26 68 M74 68 A19 19 0 1 1 74 30"/><circle class="ic-fill" cx="26" cy="30" r="5"/><circle class="ic-fill" cx="74" cy="68" r="5"/>`},
+  "獅子座": {color:"#E68A3B", path:`<circle class="ic-line" cx="32" cy="58" r="21"/><path class="ic-line" d="M50 44 C68 28,92 38,84 58 C104 52,96 82,72 74"/>`},
+  "處女座": {color:"#8D6BAE", path:`<path class="ic-line" d="M18 12 L18 60 C18 78,36 78,36 60 L36 12 M36 12 L36 60 C36 78,54 78,54 60 L54 24 M54 24 L54 72 C54 90,78 90,78 68 C78 56,60 56,60 68"/>`},
+  "天秤座": {color:"#3FB8B0", path:`<path class="ic-line" d="M14 14 L86 14"/><path class="ic-line" d="M22 44 A28 22 0 0 0 78 44"/><path class="ic-line" d="M14 88 L86 88"/>`},
+  "天蠍座": {color:"#B0435B", path:`<path class="ic-line" d="M18 12 L18 56 C18 74,36 74,36 56 L36 12 M36 12 L36 56 C36 74,54 74,54 56 L54 24 M54 24 L54 68 L80 68 M70 58 L80 68 L70 78"/>`},
+  "射手座": {color:"#D68A34", path:`<path class="ic-line" d="M16 84 L84 16 M46 12 L88 12 L88 54 M22 58 L42 78"/>`},
+  "摩羯座": {color:"#4F7566", path:`<path class="ic-line" d="M18 14 C6 2,30 -4,30 14 L30 58 C30 74,50 74,50 58 C50 46,38 46,38 58 C38 70,56 70,64 58 C76 38,96 54,84 74 C78 84,66 84,66 74"/>`},
+  "水瓶座": {color:"#4680C2", path:`<path class="ic-line" d="M8 38 L24 50 L40 38 L56 50 L72 38 L88 50 M8 68 L24 80 L40 68 L56 80 L72 68 L88 80"/>`},
+  "雙魚座": {color:"#7A8DD6", path:`<path class="ic-line" d="M32 8 C6 34,6 66,32 92 M68 8 C94 34,94 66,68 92 M8 50 L92 50"/>`}
 };
 function renderZodiacGlyph(sign){
-  const glyph = ZODIAC_ICONS[sign] || "";
+  const info = ZODIAC_ICONS[sign] || {color:"#A67C3D", path:""};
   return `<svg viewBox="0 0 100 100">
     <circle class="zg-ring" cx="50" cy="50" r="47"/>
     <circle class="zg-ring-inner" cx="50" cy="50" r="38"/>
@@ -992,7 +1176,7 @@ function renderZodiacGlyph(sign){
     <circle class="zg-spark" cx="96" cy="50" r="1.6" style="animation-delay:.9s"/>
     <circle class="zg-spark" cx="50" cy="96" r="1.6" style="animation-delay:1.5s"/>
     <circle class="zg-spark" cx="4" cy="50" r="1.6" style="animation-delay:2.1s"/>
-    <g class="zg-glyph">${glyph}</g>
+    <g class="zg-glyph" style="color:${info.color}">${info.path}</g>
   </svg>`;
 }
 document.getElementById("zodiacBtn").addEventListener("click", async ()=>{
@@ -1534,30 +1718,215 @@ document.getElementById("nameBtn").addEventListener("click", async ()=>{
 });
 
 /* ---------------------------------------------------------
-   5) 紫微斗數（簡化命宮估算）
+   5) 紫微斗數（V11 起：改用 iztro 排盤引擎，畫出完整十二宮命盤）
 --------------------------------------------------------- */
-document.getElementById("ziweiBtn").addEventListener("click", async ()=>{
-  const lunarMonth = Number(document.getElementById("ziweiMonth").value);
-  const hour = Number(document.getElementById("ziweiHour").value);
-  if(!lunarMonth || lunarMonth<1 || lunarMonth>12){ alert("請輸入正確的農曆月份（1～12）"); return; }
+// 地支在命盤格子裡的固定方位（順時針，從「巳」開始為左上角，是紫微斗數命盤的通用排法）
+function branchToGridArea(branch){
+  const idx = BRANCHES.indexOf(branch);
+  const posIdx = mod(idx - 5, 12);
+  return "c" + posIdx;
+}
+const MUTAGEN_INFO = {
+  "祿": {cls:"m-lu", label:"祿"},
+  "權": {cls:"m-quan", label:"權"},
+  "科": {cls:"m-ke", label:"科"},
+  "忌": {cls:"m-ji", label:"忌"}
+};
+const MINOR_STAR_CLASS = { lucun:"aux", soft:"aux", tianma:"ma", tough:"sha" };
 
-  const hourBranchIdx = mod(Math.floor((hour+1)/2), 12);
-  const monthPalaceIdx = mod(2 + (lunarMonth-1), 12); // 寅為正月
-  const mingGongIdx = mod(monthPalaceIdx - hourBranchIdx, 12);
-  const mingGongBranch = BRANCHES[mingGongIdx];
+function renderStarLine(star){
+  const mut = star.mutagen ? MUTAGEN_INFO[star.mutagen] : null;
+  const bright = star.brightness ? `<span class="zw-bright">${star.brightness}</span>` : "";
+  const mutHtml = mut ? `<span class="zw-mutagen ${mut.cls}" title="${mut.label}">${mut.label}</span>` : "";
+  return `<div class="zw-star-line"><span class="zw-star-major">${star.name}</span>${bright}${mutHtml}</div>`;
+}
+function renderMinorStar(star){
+  const cls = MINOR_STAR_CLASS[star.type] || "";
+  return `<span class="zw-minor ${cls}">${star.name}</span>`;
+}
+
+function renderZiweiChart(astro){
+  const cells = astro.palaces.map(p=>{
+    const area = branchToGridArea(p.earthlyBranch);
+    const isMing = p.name === "命宮";
+    const isShen = p.isBodyPalace === true;
+    const badges = [];
+    if(isMing) badges.push(`<span class="zw-badge">命宮</span>`);
+    if(isShen) badges.push(`<span class="zw-badge shen">身宮</span>`);
+    const majorsHtml = p.majorStars.length
+      ? p.majorStars.map(renderStarLine).join("")
+      : `<div class="zw-star-line"><span class="zw-bright" style="opacity:.6;">（無主星）</span></div>`;
+    const minorsHtml = p.minorStars.map(renderMinorStar).join("");
+    const adjHtml = p.adjectiveStars.map(s=>s.name).join("、");
+    const ages = (p.ages||[]).join(" ");
+    return `
+      <div class="zw-cell ${isMing?"is-ming":""} ${isShen?"is-shen":""}" style="grid-area:${area};" data-branch="${p.earthlyBranch}">
+        <div class="zw-top">
+          <span>${p.heavenlyStem}${p.earthlyBranch}</span>
+          <span class="zw-palace-name">${p.name}</span>
+        </div>
+        ${badges.length ? `<div>${badges.join(" ")}</div>` : ""}
+        <div class="zw-majors">${majorsHtml}</div>
+        ${minorsHtml ? `<div class="zw-minors">${minorsHtml}</div>` : ""}
+        ${adjHtml ? `<div class="zw-adj">${adjHtml}</div>` : ""}
+        <div class="zw-foot">
+          <span>大限 ${p.decadal.range[0]}-${p.decadal.range[1]}</span>
+          <span class="zw-ages">小限 ${ages}</span>
+        </div>
+      </div>`;
+  }).join("");
+
+  const centerHtml = `
+    <div class="zw-center">
+      <div class="zw-center-title">${astro.fiveElementsClass}</div>
+      <div class="zw-center-grid">
+        <div>陽曆：<b>${astro.solarDate}</b></div>
+        <div>農曆：<b>${astro.lunarDate}</b></div>
+        <div>干支：<b>${astro.chineseDate}</b></div>
+        <div>生肖：<b>${astro.zodiac}</b></div>
+        <div>星座：<b>${astro.sign}</b></div>
+        <div>時辰：<b>${astro.time}</b></div>
+        <div>命主：<b>${astro.soul}</b></div>
+        <div>身主：<b>${astro.body}</b></div>
+      </div>
+    </div>`;
+
+  return cells + centerHtml;
+}
+
+// 把命宮＋財帛＋官祿＋夫妻＋疾厄五個對命理解讀最關鍵的宮位整理成文字，餵給 AI 做更精準的解讀
+function summarizeZiweiForAI(astro, age){
+  const keyPalaceNames = ["命宮","財帛","官祿","夫妻","疾厄","福德"];
+  const lines = astro.palaces
+    .filter(p=>keyPalaceNames.includes(p.name))
+    .map(p=>{
+      const stars = p.majorStars.map(s=>`${s.name}${s.brightness?`(${s.brightness})`:""}${s.mutagen?`化${s.mutagen}`:""}`).join("、") || "無主星";
+      return `${p.name}（${p.heavenlyStem}${p.earthlyBranch}）：${stars}`;
+    });
+  let currentDecadal = "";
+  if(Number.isFinite(age)){
+    const dp = astro.palaces.find(p=>age >= p.decadal.range[0] && age <= p.decadal.range[1]);
+    if(dp) currentDecadal = `目前約${age}歲，落在「${dp.name}」大限（${dp.decadal.range[0]}-${dp.decadal.range[1]}歲）。`;
+  }
+  return `五行局：${astro.fiveElementsClass}。命主：${astro.soul}，身主：${astro.body}。${lines.join("；")}。${currentDecadal}`;
+}
+
+// --------- 命盤放大檢視 Modal（手機字太小看不清楚時，點宮位彈出大視窗） ---------
+let lastZiweiAstro = null;
+const zwModalOverlay = document.getElementById("zwModalOverlay");
+const zwModal = document.getElementById("zwModal");
+
+function renderPalaceModal(p){
+  const isMing = p.name === "命宮";
+  const isShen = p.isBodyPalace === true;
+  const badges = [];
+  if(isMing) badges.push(`<span class="zw-badge">命宮</span>`);
+  if(isShen) badges.push(`<span class="zw-badge shen">身宮</span>`);
+
+  const majorsHtml = p.majorStars.length
+    ? p.majorStars.map(s=>{
+        const mut = s.mutagen ? MUTAGEN_INFO[s.mutagen] : null;
+        return `<div class="zw-modal-star-line">
+          <span>${s.name}</span>
+          ${s.brightness?`<span class="zw-bright">${s.brightness}</span>`:""}
+          ${mut?`<span class="zw-mutagen ${mut.cls}">${mut.label}</span>`:""}
+        </div>`;
+      }).join("")
+    : `<div class="zw-modal-empty">（無主星，命理上稱為「空宮」，通常借對宮星曜來看）</div>`;
+
+  const minorsHtml = p.minorStars.length
+    ? p.minorStars.map(s=>`<span class="zw-minor ${MINOR_STAR_CLASS[s.type]||""}">${s.name}</span>`).join("　")
+    : "無";
+  const adjHtml = p.adjectiveStars.length ? p.adjectiveStars.map(s=>s.name).join("、") : "無";
+
+  zwModal.innerHTML = `
+    <button class="zw-modal-close" id="zwModalClose" aria-label="關閉">✕</button>
+    <div class="zw-modal-top">${p.heavenlyStem}${p.earthlyBranch} 宮</div>
+    <div class="zw-modal-title">${p.name}</div>
+    ${badges.length? `<div class="zw-modal-badges">${badges.join("")}</div>` : ""}
+
+    <div class="zw-modal-section-label">主星</div>
+    <div class="zw-modal-majors">${majorsHtml}</div>
+
+    <div class="zw-modal-section-label">輔星／煞星</div>
+    <div class="zw-modal-minors">${minorsHtml}</div>
+
+    <div class="zw-modal-section-label">雜曜</div>
+    <div class="zw-modal-adj">${adjHtml}</div>
+
+    <div class="zw-modal-foot">
+      <div>大限：${p.decadal.range[0]} - ${p.decadal.range[1]} 歲</div>
+      <div>小限歲數：${(p.ages||[]).join("、")}</div>
+    </div>
+  `;
+  document.getElementById("zwModalClose").addEventListener("click", closeZwModal);
+  zwModalOverlay.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeZwModal(){
+  zwModalOverlay.classList.remove("open");
+  document.body.style.overflow = "";
+}
+zwModalOverlay.addEventListener("click", (e)=>{
+  if(e.target === zwModalOverlay) closeZwModal();
+});
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape") closeZwModal();
+});
+document.getElementById("ziweiChart").addEventListener("click", (e)=>{
+  const cell = e.target.closest(".zw-cell");
+  if(!cell || !lastZiweiAstro) return;
+  const branch = cell.getAttribute("data-branch");
+  const palace = lastZiweiAstro.palaces.find(p=>p.earthlyBranch === branch);
+  if(palace) renderPalaceModal(palace);
+});
+
+document.getElementById("ziweiBtn").addEventListener("click", async ()=>{
+  const dateVal = document.getElementById("ziweiDate").value;
+  const hintEl = document.getElementById("ziweiDateHint");
+  const parsed = parseDateInput(dateVal);
+  if(!parsed){
+    if(hintEl){ hintEl.textContent = "請輸入正確的 8 碼日期，例如 19990101"; hintEl.classList.add("field-hint-error"); }
+    return;
+  }
+  const {y,m,d} = parsed;
+  const hh = Number(document.getElementById("ziweiHour").value || 12);
+  const mm = Number(document.getElementById("ziweiMinute").value || 0);
+  const gender = document.getElementById("ziweiGender").value;
+  const timeIndex = hourMinuteToTimeIndex(hh, mm);
+
+  const chartEl = document.getElementById("ziweiChart");
+  const btn = document.getElementById("ziweiBtn");
+  let astro;
+  try{
+    astro = iztro.astro.bySolar(`${y}-${m}-${d}`, timeIndex, gender, true, "zh-TW");
+  }catch(e){
+    console.error(e);
+    chartEl.innerHTML = `<div class="zw-placeholder">排盤失敗，請確認日期是否正確（${e.message||""}）</div>`;
+    return;
+  }
 
   document.getElementById("ziweiChips").innerHTML = `
-    <span class="chip">農曆 ${lunarMonth} 月</span>
-    <span class="chip">時辰 ${BRANCHES[hourBranchIdx]}時</span>
-    <span class="chip mono">命宮 ${mingGongBranch}宮</span>`;
+    <span class="chip mono">${astro.chineseDate}</span>
+    <span class="chip">${astro.fiveElementsClass}</span>
+    <span class="chip">生肖 ${astro.zodiac}</span>
+    <span class="chip">${astro.sign}</span>
+    <span class="chip mono">命宮 ${astro.earthlyBranchOfSoulPalace}宮</span>`;
+
+  chartEl.innerHTML = renderZiweiChart(astro);
+  lastZiweiAstro = astro;
+  document.getElementById("ziweiChartHint").style.display = "block";
   triggerMysticFlash(document.getElementById("ziweiResultCol"));
 
   const readingEl = document.getElementById("ziweiReading");
   readingEl.innerHTML = `<span class="placeholder mystic-loading"><span class="spin-rune">✦</span> 正在推演命盤...</span>`;
-  const btn = document.getElementById("ziweiBtn"); btn.disabled = true;
+  btn.disabled = true;
+
+  const age = new Date().getFullYear() - y + 1; // 虛歲，命理習慣用法
+  const summary = summarizeZiweiForAI(astro, age);
   const text = await askClaude(
-    "你是一位熟悉紫微斗數的命理顧問。使用者只提供了命宮所在地支宮位（尚未有完整十四主星排盤），請用繁體中文，根據命宮地支的方位意象，給出人生大方向、性格傾向的解讀，並明確提醒這只是簡化估算、非完整命盤分析。語氣沉穩、不誇大。控制在280字以內。",
-    `我的命宮落在「${mingGongBranch}」宮，出生農曆${lunarMonth}月，${BRANCHES[hourBranchIdx]}時生。請給我初步解讀。`
+    "你是一位熟悉紫微斗數的專業命理顧問。使用者會提供完整命盤的關鍵宮位主星資料（命宮、財帛、官祿、夫妻、疾厄、福德），請用繁體中文，針對性格傾向、事業財運、感情婚姻給出整合解讀，若有提到目前所在大限，也請呼應該階段的重點。語氣沉穩、不誇大、不做絕對斷言，控制在350字以內，並在文末提醒命盤解法會因流派而略有差異，僅供參考。",
+    `性別：${gender}。${summary}`
   );
   readingEl.innerHTML = renderMarkdownLite(text);
   triggerMysticFlash(document.getElementById("ziweiResultCol"));
