@@ -218,7 +218,7 @@
     font-size:32px; font-weight:900; color:var(--gold-deep); margin:0 0 4px; letter-spacing:1px;
   }
   .panel .sub{color:var(--ink-dim); font-size:14px; margin-bottom:28px;}
-  .grid{display:grid; grid-template-columns:1fr 1.2fr; gap:36px;}
+  .grid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.2fr); gap:36px;}
   @media (max-width:800px){ .grid{grid-template-columns:1fr;} }
 
   label{display:block; font-size:13px; color:var(--gold-deep-dim); margin:16px 0 6px; letter-spacing:1px;}
@@ -371,11 +371,21 @@
   .wuxing-legend span{ display:inline-flex; align-items:center; gap:4px; }
   .wuxing-legend i{ width:8px; height:8px; border-radius:50%; display:inline-block; }
 
-  /* 八字進階版：四柱詳批表 */
+  /* 八字進階版：四柱詳批表（手機版用橫向捲動容器包起來，做法比照紫微命盤） */
+  .pillar-table-scroll{
+    overflow-x:auto; -webkit-overflow-scrolling:touch; margin-bottom:6px; padding-bottom:6px;
+  }
+  .pillar-table-hint{
+    font-size:11.5px; color:var(--gold-deep-dim); text-align:center; margin:-2px 0 20px;
+  }
+  @media (min-width:641px){ .pillar-table-hint{ display:none !important; } }
   .pillar-table{
     display:grid; grid-template-columns:52px repeat(4,1fr); gap:1px;
     background:var(--paper-line); border:1px solid var(--paper-line); border-radius:10px;
-    overflow:hidden; margin-bottom:22px; font-size:12px;
+    overflow:hidden; font-size:12px;
+  }
+  @media (max-width:640px){
+    .pillar-table{ grid-template-columns:48px repeat(4,110px); min-width:488px; }
   }
   .pillar-table .pt-cell{ background:var(--paper); padding:8px 6px; text-align:center; }
   .pillar-table .pt-head{ background:rgba(166,124,61,0.14); font-weight:700; color:var(--gold-deep); }
@@ -1052,7 +1062,7 @@
    - 日期：每次開啟頁面自動抓當天日期，不用手動改
    - 版次：只要在這裡改 SITE_VERSION 一個地方，footer 會自動同步
 --------------------------------------------------------- */
-const SITE_VERSION = "V27"; // 之後更新版本，只需要改這一行，例如 "V28"
+const SITE_VERSION = "V28"; // 之後更新版本，只需要改這一行，例如 "V29"
 (function initFooterMeta(){
   const now = new Date();
   const y = now.getFullYear();
@@ -1639,14 +1649,17 @@ function renderPillarTable(ec){
   const wxRow = cols.map(c=>`<div class="pt-cell pt-wuxing${dayCls(c)}">${c.wx}</div>`).join("");
   const nayinRow = cols.map(c=>`<div class="pt-cell pt-nayin${dayCls(c)}">${c.nayin}</div>`).join("");
   return `
-    <div class="pillar-table">
-      <div class="pt-cell pt-head"></div>${headRow}
-      <div class="pt-cell pt-row-label">十神</div>${shishenRow}
-      <div class="pt-cell pt-row-label">干支</div>${gzRow}
-      <div class="pt-cell pt-row-label">藏干</div>${hideRow}
-      <div class="pt-cell pt-row-label">五行</div>${wxRow}
-      <div class="pt-cell pt-row-label">納音</div>${nayinRow}
-    </div>`;
+    <div class="pillar-table-scroll">
+      <div class="pillar-table">
+        <div class="pt-cell pt-head"></div>${headRow}
+        <div class="pt-cell pt-row-label">十神</div>${shishenRow}
+        <div class="pt-cell pt-row-label">干支</div>${gzRow}
+        <div class="pt-cell pt-row-label">藏干</div>${hideRow}
+        <div class="pt-cell pt-row-label">五行</div>${wxRow}
+        <div class="pt-cell pt-row-label">納音</div>${nayinRow}
+      </div>
+    </div>
+    <div class="pillar-table-hint" id="pillarTableHint" style="display:none;">💡 手機螢幕較小，可以左右滑動查看完整四柱表格</div>`;
 }
 
 /* ---------------------------------------------------------
@@ -1907,6 +1920,8 @@ document.getElementById("baziBtn").addEventListener("click", async ()=>{
     <span class="chip">日主 ${ec.getDayGan()}(${STEM_ELEMENT[ec.getDayGan()]})</span>`;
 
   document.getElementById("baziPillarTable").innerHTML = renderPillarTable(ec);
+  const pillarHintEl = document.getElementById("pillarTableHint");
+  if(pillarHintEl) pillarHintEl.style.display = "block";
 
   const wuxingCounts = computeWuxing(pillars);
   const wuxingEl = document.getElementById("baziWuxing");
