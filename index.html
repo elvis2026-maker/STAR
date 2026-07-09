@@ -367,6 +367,74 @@
   .wuxing-legend span{ display:inline-flex; align-items:center; gap:4px; }
   .wuxing-legend i{ width:8px; height:8px; border-radius:50%; display:inline-block; }
 
+  /* 八字進階版：四柱詳批表 */
+  .pillar-table{
+    display:grid; grid-template-columns:52px repeat(4,1fr); gap:1px;
+    background:var(--paper-line); border:1px solid var(--paper-line); border-radius:10px;
+    overflow:hidden; margin-bottom:22px; font-size:12px;
+  }
+  .pillar-table .pt-cell{ background:var(--paper); padding:8px 6px; text-align:center; }
+  .pillar-table .pt-head{ background:rgba(166,124,61,0.14); font-weight:700; color:var(--gold-deep); }
+  .pillar-table .pt-row-label{ background:rgba(166,124,61,0.06); color:var(--ink-dim); font-size:11px; display:flex; align-items:center; justify-content:center; }
+  .pillar-table .pt-ganzhi{ font-family:'Noto Serif TC',serif; font-weight:900; font-size:18px; color:var(--ink); }
+  .pillar-table .pt-day{ background:rgba(166,124,61,0.10); }
+  .pillar-table .pt-day .pt-ganzhi{ color:var(--gold-deep); }
+  .pillar-table .pt-shishen{ font-size:11px; color:var(--violet); }
+  .pillar-table .pt-hidegan{ font-size:10.5px; color:var(--ink-dim); line-height:1.5; }
+  .pillar-table .pt-wuxing{ font-size:11px; }
+  .pillar-table .pt-nayin{ font-size:11px; color:var(--jade); }
+  @media (max-width:520px){ .pillar-table{ font-size:10.5px; } .pillar-table .pt-ganzhi{ font-size:15px; } }
+
+  /* 八字進階版：神煞 */
+  .shensha-title{ font-size:11px; letter-spacing:2px; color:var(--gold-deep-dim); margin-bottom:8px; text-transform:uppercase; }
+  .shensha-chip{ border-color:var(--cinnabar); color:var(--cinnabar); background:rgba(178,59,59,0.06); }
+  .shensha-empty{ font-size:12px; color:var(--ink-dim); font-style:italic; margin-bottom:18px; }
+
+  /* 八字進階版：日主旺衰／用神喜忌 */
+  .strength-card{ border:1px solid var(--paper-line); border-radius:12px; padding:16px 18px; margin-bottom:22px; background:rgba(255,255,255,0.35); }
+  .strength-badge{ display:inline-block; font-family:'Noto Serif TC',serif; font-weight:900; font-size:19px; color:var(--gold-deep); margin-bottom:10px; }
+  .strength-bar{ height:8px; border-radius:999px; background:rgba(43,36,24,0.08); overflow:hidden; margin-bottom:12px; }
+  .strength-bar-fill{ height:100%; background:linear-gradient(90deg, var(--jade), var(--gold-deep)); border-radius:999px; transition:width .8s ease; }
+  .strength-note{ font-size:13px; color:var(--ink-dim); line-height:1.8; margin-bottom:12px; }
+  .strength-tags{ display:flex; gap:8px; flex-wrap:wrap; }
+  .tag{ font-size:11.5px; padding:4px 10px; border-radius:999px; border:1px solid; }
+  .tag-yong{ color:var(--jade); border-color:var(--jade); background:rgba(62,110,94,0.08); }
+  .tag-ji{ color:var(--cinnabar); border-color:var(--cinnabar); background:rgba(178,59,59,0.08); }
+
+  /* 八字進階版：四柱刑沖會合關係圖（沿用姓名學五格圖的連線動畫手法） */
+  .xcp-wrap{ margin:24px 0; }
+  .xcp-title{ font-size:11px; letter-spacing:2px; color:var(--gold-deep-dim); text-align:center; margin-bottom:12px; text-transform:uppercase; }
+  .xcp-wrap svg{ width:100%; max-width:270px; display:block; margin:0 auto; overflow:visible; }
+  .xcp-line{ stroke-width:1.6; fill:none; stroke-dasharray:230; stroke-dashoffset:230; opacity:0; animation:xcpLineDraw .7s ease forwards; }
+  @keyframes xcpLineDraw{ to{ opacity:.85; stroke-dashoffset:0; } }
+  .xcp-node{ opacity:0; transform:scale(.4); transform-box:fill-box; transform-origin:center; animation:wugePop .5s cubic-bezier(.2,.8,.3,1.25) forwards; }
+  .xcp-label{ font-family:'Noto Serif TC',serif; font-size:11px; fill:var(--ink-dim); text-anchor:middle; }
+  .xcp-value{ font-family:'Space Mono',monospace; font-weight:700; font-size:16px; fill:var(--gold-deep); text-anchor:middle; }
+  .xcp-legend{ display:flex; flex-wrap:wrap; gap:7px 14px; justify-content:center; margin-top:12px; font-size:11px; color:var(--ink-dim); }
+  .xcp-legend i{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:4px; }
+  .xcp-legend-empty{ text-align:center; font-size:12px; color:var(--ink-dim); font-style:italic; margin-top:10px; }
+  @media (prefers-reduced-motion: reduce){ .xcp-line, .xcp-node{ animation:none; opacity:1; stroke-dashoffset:0; transform:scale(1); } }
+
+  /* 八字進階版：大運／流年時間軸 */
+  .dy-section-label{ font-size:11px; letter-spacing:2px; color:var(--gold-deep-dim); margin:6px 0 10px; text-transform:uppercase; }
+  .dy-track{ display:flex; gap:10px; overflow-x:auto; padding-bottom:8px; margin-bottom:22px; -webkit-overflow-scrolling:touch; }
+  .dy-card{
+    flex:0 0 auto; min-width:92px; border:1px solid var(--paper-line); border-radius:10px;
+    background:rgba(255,255,255,0.4); padding:10px 8px; text-align:center; cursor:pointer;
+    transition:background .15s, transform .15s, box-shadow .15s;
+  }
+  .dy-card:hover, .dy-card:active{ background:rgba(255,255,255,0.75); transform:translateY(-2px); box-shadow:0 6px 16px rgba(43,36,24,0.12); }
+  .dy-card.current{ border-color:var(--gold-deep); background:rgba(166,124,61,0.16); box-shadow:inset 0 0 0 1.5px var(--gold-deep); }
+  .dy-age{ font-family:'Space Mono',monospace; font-size:10px; color:var(--gold-deep-dim); margin-bottom:4px; }
+  .dy-gz{ font-family:'Noto Serif TC',serif; font-weight:900; font-size:18px; color:var(--ink); }
+  .dy-year{ font-family:'Space Mono',monospace; font-size:9.5px; color:var(--ink-dim); margin-top:4px; }
+  .ln-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:6px; }
+  .ln-item{ display:flex; justify-content:space-between; align-items:center; gap:6px; padding:7px 10px; border:1px solid var(--paper-line); border-radius:8px; font-size:12.5px; background:rgba(255,255,255,0.35); }
+  .ln-year{ color:var(--ink-dim); font-size:11px; }
+  .ln-age{ color:var(--gold-deep-dim); font-size:11px; }
+  .ln-gz{ font-weight:700; color:var(--gold-deep); }
+  @media (max-width:520px){ .ln-grid{ grid-template-columns:1fr; } }
+
   /* 紫微斗數：全盤命盤（V11 起改用 iztro 排盤引擎，畫出完整十二宮） */
   .panel-ziwei .ziwei-input-row{
     display:flex; flex-wrap:wrap; gap:18px; align-items:flex-start; margin-bottom:8px;
@@ -825,8 +893,8 @@
 
   <!-- ===================== 八字 ===================== -->
   <section class="panel" id="bazi" data-index="03 / BAZI">
-    <h2>八字四柱（簡化版）</h2>
-    <div class="sub">輸入國曆出生日期時間，估算年月日時四柱干支</div>
+    <h2>八字四柱（進階版）</h2>
+    <div class="sub">使用開源 lunar-javascript 引擎精確排盤，自動推算十神／五行／納音／神煞／日主旺衰／大運流年</div>
     <div class="grid">
       <div>
         <label>國曆出生日期</label>
@@ -844,9 +912,15 @@
       </div>
       <div class="result-col">
         <div class="structured" id="baziChips"></div>
+        <div id="baziPillarTable"></div>
         <div id="baziWuxing" class="wuxing-chart"></div>
+        <div id="baziStrength"></div>
+        <div id="baziShenSha"></div>
+        <div id="baziRelations"></div>
+        <div class="dy-section-label" id="baziDyLabel" style="display:none;">大運／流年（左右滑動瀏覽，點擊卡片看該十年逐年流年）</div>
+        <div id="baziDaYun" class="dy-track"></div>
         <div class="reading" id="baziReading"><span class="placeholder">結果將顯示於此</span></div>
-        <div class="disclaimer">此為簡化演算法（以國曆月份近似節氣月、日柱以公式估算），未校正精確節氣與時區，正式上線前建議串接專業萬年曆引擎核對。</div>
+        <div class="disclaimer">四柱、十神、五行、納音、大運流年由開源 <a href="https://github.com/6tail/lunar-javascript" target="_blank" rel="noopener">lunar-javascript</a> 引擎依節氣精確排盤；日主旺衰與用神喜忌為簡化版強弱判斷法，僅供初步參考，非傳統命理師的完整格局論斷。</div>
       </div>
     </div>
   </section>
@@ -944,6 +1018,8 @@
 
 <!-- 紫微斗數排盤引擎（開源套件 iztro，MIT License：https://github.com/SylarLong/iztro）-->
 <script src="vendor/iztro.min.js"></script>
+<!-- 八字排盤引擎（開源套件 lunar-javascript，MIT License：https://github.com/6tail/lunar-javascript）-->
+<script src="vendor/lunar.js"></script>
 <script>
 /* ---------------------------------------------------------
    星空背景：動態產生閃爍星點
@@ -971,7 +1047,7 @@
    - 日期：每次開啟頁面自動抓當天日期，不用手動改
    - 版次：只要在這裡改 SITE_VERSION 一個地方，footer 會自動同步
 --------------------------------------------------------- */
-const SITE_VERSION = "V25"; // 之後更新版本，只需要改這一行，例如 "V26"
+const SITE_VERSION = "V26"; // 之後更新版本，只需要改這一行，例如 "V27"
 (function initFooterMeta(){
   const now = new Date();
   const y = now.getFullYear();
@@ -1403,47 +1479,8 @@ document.getElementById("tarotBtn").addEventListener("click", ()=>{
 /* ---------------------------------------------------------
    3) 八字（簡化版）
 --------------------------------------------------------- */
-const STEMS = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
 const BRANCHES = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-const ANIMALS = ['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬'];
-
 function mod(n, m){ return ((n % m) + m) % m; }
-
-function toJDN(y,m,d){
-  const a = Math.floor((14-m)/12);
-  const y2 = y + 4800 - a;
-  const m2 = m + 12*a - 3;
-  return d + Math.floor((153*m2+2)/5) + 365*y2 + Math.floor(y2/4) - Math.floor(y2/100) + Math.floor(y2/400) - 32045;
-}
-
-function getFourPillars(y, m, d, hour){
-  // 年柱（以國曆年份簡化計算，未校正立春分界）
-  const yearStemIdx = mod(y - 4, 10);
-  const yearBranchIdx = mod(y - 4, 12);
-
-  // 日柱（以儒略日估算，簡化演算法，未逐一核對萬年曆）
-  const jdn = toJDN(y,m,d);
-  const dayStemIdx = mod(jdn + 9, 10);
-  const dayBranchIdx = mod(jdn + 1, 12);
-
-  // 月柱（以國曆月份近似節氣月，簡化）
-  const yinStartStem = [2,4,6,8,0][mod(yearStemIdx,5)]; // 丙戊庚壬甲
-  const monthBranchIdx = mod(2 + (m-1), 12); // 寅為正月起
-  const monthStemIdx = mod(yinStartStem + (m-1), 10);
-
-  // 時柱
-  const hourBranchIdx = mod(Math.floor((hour+1)/2), 12);
-  const ziStartStem = [0,2,4,6,8][mod(dayStemIdx,5)]; // 甲丙戊庚壬
-  const hourStemIdx = mod(ziStartStem + hourBranchIdx, 10);
-
-  return {
-    year: STEMS[yearStemIdx]+BRANCHES[yearBranchIdx],
-    month: STEMS[monthStemIdx]+BRANCHES[monthBranchIdx],
-    day: STEMS[dayStemIdx]+BRANCHES[dayBranchIdx],
-    hour: STEMS[hourStemIdx]+BRANCHES[hourBranchIdx],
-    animal: ANIMALS[yearBranchIdx]
-  };
-}
 
 /* ---------------------------------------------------------
    五行分布圖：統計四柱八字（天干+地支共8個字）對應的五行次數
@@ -1564,6 +1601,268 @@ function animateWuxingPentagon(container){
   requestAnimationFrame(frame);
 }
 
+/* ---------------------------------------------------------
+   lunar-javascript 引擎的十神／納音／生肖文字內建只有簡體中文，
+   這裡建立簡體→繁體的對照表，讓畫面顯示與站內其餘文字（繁體）一致。
+   （天干地支、五行單字兩岸寫法相同，不需要轉換。）
+--------------------------------------------------------- */
+const SS_TRAD = {"比肩":"比肩","劫财":"劫財","食神":"食神","伤官":"傷官","偏财":"偏財","正财":"正財","七杀":"七殺","正官":"正官","偏印":"偏印","正印":"正印"};
+function ssTrad(s){ return SS_TRAD[s] || s; }
+const SX_TRAD = {"鼠":"鼠","牛":"牛","虎":"虎","兔":"兔","龙":"龍","蛇":"蛇","马":"馬","羊":"羊","猴":"猴","鸡":"雞","狗":"狗","猪":"豬"};
+function sxTrad(s){ return SX_TRAD[s] || s; }
+const NAYIN_FIX = [["白蜡","白蠟"],["杨柳","楊柳"],["炉中","爐中"],["剑锋","劍鋒"],["山头","山頭"],["覆灯","覆燈"],["涧下","澗下"],["城头","城頭"],["大驿","大驛"],["钗钏","釵釧"],["霹雳","霹靂"],["长流","長流"]];
+function nayinTrad(s){ let out = s; NAYIN_FIX.forEach(([a,b])=>{ out = out.replace(a,b); }); return out; }
+
+/* ---------------------------------------------------------
+   3-1) 四柱詳批表：十神／藏干／五行／納音（lunar-javascript 引擎資料）
+--------------------------------------------------------- */
+function renderPillarTable(ec){
+  const cols = [
+    { label:"年柱", gz:ec.getYear(),  shishenGan:ssTrad(ec.getYearShiShenGan()),  hideGan:ec.getYearHideGan(),  shishenZhi:ec.getYearShiShenZhi().map(ssTrad),  wx:ec.getYearWuXing(),  nayin:nayinTrad(ec.getYearNaYin()) },
+    { label:"月柱", gz:ec.getMonth(), shishenGan:ssTrad(ec.getMonthShiShenGan()), hideGan:ec.getMonthHideGan(), shishenZhi:ec.getMonthShiShenZhi().map(ssTrad), wx:ec.getMonthWuXing(), nayin:nayinTrad(ec.getMonthNaYin()) },
+    { label:"日柱", gz:ec.getDay(),   shishenGan:"日主",                          hideGan:ec.getDayHideGan(),   shishenZhi:ec.getDayShiShenZhi().map(ssTrad),   wx:ec.getDayWuXing(),   nayin:nayinTrad(ec.getDayNaYin()), isDay:true },
+    { label:"時柱", gz:ec.getTime(),  shishenGan:ssTrad(ec.getTimeShiShenGan()),  hideGan:ec.getTimeHideGan(),  shishenZhi:ec.getTimeShiShenZhi().map(ssTrad),  wx:ec.getTimeWuXing(),  nayin:nayinTrad(ec.getTimeNaYin()) }
+  ];
+  const dayCls = (c)=> c.isDay ? " pt-day" : "";
+  const headRow = cols.map(c=>`<div class="pt-cell pt-head${dayCls(c)}">${c.label}</div>`).join("");
+  const shishenRow = cols.map(c=>`<div class="pt-cell pt-shishen${dayCls(c)}">${c.shishenGan}</div>`).join("");
+  const gzRow = cols.map(c=>`<div class="pt-cell${dayCls(c)}"><span class="pt-ganzhi">${c.gz}</span></div>`).join("");
+  const hideRow = cols.map(c=>{
+    const txt = c.hideGan.map((g,i)=> `${g}${c.shishenZhi[i] ? "("+c.shishenZhi[i]+")" : ""}`).join("、");
+    return `<div class="pt-cell pt-hidegan${dayCls(c)}">${txt}</div>`;
+  }).join("");
+  const wxRow = cols.map(c=>`<div class="pt-cell pt-wuxing${dayCls(c)}">${c.wx}</div>`).join("");
+  const nayinRow = cols.map(c=>`<div class="pt-cell pt-nayin${dayCls(c)}">${c.nayin}</div>`).join("");
+  return `
+    <div class="pillar-table">
+      <div class="pt-cell pt-head"></div>${headRow}
+      <div class="pt-cell pt-row-label">十神</div>${shishenRow}
+      <div class="pt-cell pt-row-label">干支</div>${gzRow}
+      <div class="pt-cell pt-row-label">藏干</div>${hideRow}
+      <div class="pt-cell pt-row-label">五行</div>${wxRow}
+      <div class="pt-cell pt-row-label">納音</div>${nayinRow}
+    </div>`;
+}
+
+/* ---------------------------------------------------------
+   3-2) 神煞（簡化版，以日柱起算的常見神煞：天乙貴人／桃花／驛馬／華蓋／祿神／羊刃）
+--------------------------------------------------------- */
+const TIANYI_MAP = {甲:["丑","未"],戊:["丑","未"],庚:["丑","未"],乙:["子","申"],己:["子","申"],丙:["亥","酉"],丁:["亥","酉"],壬:["卯","巳"],癸:["卯","巳"],辛:["寅","午"]};
+const SANHE_GROUP = {申:"申子辰",子:"申子辰",辰:"申子辰",巳:"巳酉丑",酉:"巳酉丑",丑:"巳酉丑",寅:"寅午戌",午:"寅午戌",戌:"寅午戌",亥:"亥卯未",卯:"亥卯未",未:"亥卯未"};
+const TAOHUA_MAP = {"申子辰":"酉","巳酉丑":"午","寅午戌":"卯","亥卯未":"子"};
+const YIMA_MAP = {"申子辰":"寅","寅午戌":"申","巳酉丑":"亥","亥卯未":"巳"};
+const HUAGAI_MAP = {"申子辰":"辰","寅午戌":"戌","巳酉丑":"丑","亥卯未":"未"};
+const LUSHEN_MAP = {甲:"寅",乙:"卯",丙:"巳",戊:"巳",丁:"午",己:"午",庚:"申",辛:"酉",壬:"亥",癸:"子"};
+const YANGREN_MAP = {甲:"卯",丙:"午",戊:"午",庚:"酉",壬:"子"};
+
+function computeShenSha(dayGan, dayZhi, pillars){
+  const group = SANHE_GROUP[dayZhi];
+  const results = [];
+  function addIfMatch(name, target){
+    if(!target) return;
+    const targets = Array.isArray(target) ? target : [target];
+    const hitLabels = pillars.filter(p=>targets.includes(p.zhi)).map(p=>p.label);
+    if(hitLabels.length) results.push({name, at:hitLabels});
+  }
+  addIfMatch("天乙貴人", TIANYI_MAP[dayGan]);
+  addIfMatch("桃花", TAOHUA_MAP[group]);
+  addIfMatch("驛馬", YIMA_MAP[group]);
+  addIfMatch("華蓋", HUAGAI_MAP[group]);
+  addIfMatch("祿神", LUSHEN_MAP[dayGan]);
+  addIfMatch("羊刃", YANGREN_MAP[dayGan]);
+  return results;
+}
+
+function renderShenSha(list){
+  if(!list.length){
+    return `<div class="shensha-empty">四柱之中沒有偵測到本站收錄的常見神煞組合。</div>`;
+  }
+  const chips = list.map(s=>`<span class="chip shensha-chip">${s.name}：${s.at.join("、")}</span>`).join("");
+  return `<div class="shensha-title">神煞（以日柱起算，簡化版常見神煞）</div><div class="structured">${chips}</div>`;
+}
+
+/* ---------------------------------------------------------
+   3-3) 日主旺衰＋用神喜忌（簡化版強弱判斷法）
+--------------------------------------------------------- */
+function analyzeStrength(ec){
+  const dayGan = ec.getDayGan();
+  const shishenList = [];
+  shishenList.push({ss: ec.getYearShiShenGan(), w:1});
+  shishenList.push({ss: ec.getMonthShiShenGan(), w:1});
+  shishenList.push({ss: ec.getTimeShiShenGan(), w:1});
+  [
+    {list: ec.getYearShiShenZhi(),  isMonth:false},
+    {list: ec.getMonthShiShenZhi(), isMonth:true},
+    {list: ec.getDayShiShenZhi(),   isMonth:false},
+    {list: ec.getTimeShiShenZhi(),  isMonth:false}
+  ].forEach(b=>{
+    b.list.forEach((ss,i)=>{
+      let w = i===0 ? 1 : 0.4; // 藏干主氣權重較高，餘氣較低
+      if(b.isMonth && i===0) w += 1; // 月令主氣＝「得令」，額外加權，月令對日主旺衰影響最大
+      shishenList.push({ss, w});
+    });
+  });
+  // 注意：lunar-javascript 引擎回傳的十神文字是簡體中文（例如「伤官」「正财」「七杀」），
+  // 這裡的比對必須用簡體字串才抓得到，繁體字只用在畫面顯示時用 ssTrad() 轉換。
+  const HELP = ["比肩","劫财","正印","偏印"];
+  const DRAIN = ["食神","伤官","正财","偏财","正官","七杀"];
+  let supportScore=0, drainScore=0;
+  shishenList.forEach(({ss,w})=>{
+    if(HELP.includes(ss)) supportScore += w;
+    else if(DRAIN.includes(ss)) drainScore += w;
+  });
+  const total = supportScore + drainScore;
+  const ratio = total ? supportScore/total : 0.5;
+  let verdict, yongElements, jiElements, note;
+  if(ratio >= 0.58){
+    verdict = "身旺";
+    yongElements = ["食傷","財星","官殺"]; jiElements = ["比劫","印綬"];
+    note = "日主偏旺，命局中「生助日主」的比肩劫財、正偏印力量較強，通常喜歡有食傷、財星、官殺來洩秀、耗身或加以管束，較忌比劫、印綬力量再加重、讓五行失衡更明顯。";
+  } else if(ratio <= 0.42){
+    verdict = "身弱";
+    yongElements = ["印綬","比劫"]; jiElements = ["食傷","財星","官殺"];
+    note = "日主偏弱，命局中「洩耗剋制日主」的食傷、財星、官殺力量較強，通常喜歡有印綬、比劫來生扶日主，較忌食傷、財星、官殺力量再加重。";
+  } else {
+    verdict = "中和";
+    yongElements = ["需再搭配大運流年與季節調候細看"]; jiElements = [];
+    note = "日主生助與洩耗的力量大致平衡，五行分佈較為中和，沒有單一明顯偏向，用神喜忌建議再搭配大運流年走勢一併觀察。";
+  }
+  return { verdict, ratio, supportScore, drainScore, yongElements, jiElements, note };
+}
+
+function renderStrength(a){
+  return `
+    <div class="strength-card">
+      <div class="strength-badge">日主${a.verdict}</div>
+      <div class="strength-bar"><div class="strength-bar-fill" data-target-pct="${Math.round(a.ratio*100)}" style="width:0%"></div></div>
+      <div class="strength-note">${a.note}</div>
+      <div class="strength-tags">
+        <span class="tag tag-yong">用神方向：${a.yongElements.join("、")}</span>
+        ${a.jiElements.length ? `<span class="tag tag-ji">忌神方向：${a.jiElements.join("、")}</span>` : ""}
+      </div>
+    </div>`;
+}
+function animateStrengthBar(container){
+  const fill = container.querySelector(".strength-bar-fill");
+  if(!fill) return;
+  void fill.offsetWidth;
+  requestAnimationFrame(()=>{ fill.style.width = fill.getAttribute("data-target-pct") + "%"; });
+}
+
+/* ---------------------------------------------------------
+   3-4) 四柱刑沖會合關係圖（沿用姓名學五格圖的 SVG 連線動畫手法）
+--------------------------------------------------------- */
+function zhiIdx(z){ return BRANCHES.indexOf(z); }
+function getZhiRelation(idxA, idxB){
+  if(idxA === idxB){
+    if([4,6,9,11].includes(idxA)) return {label:`${BRANCHES[idxA]}${BRANCHES[idxA]}自刑`, color:"var(--cinnabar)", dash:"5 4"};
+    return null;
+  }
+  const key = [idxA,idxB].sort((x,y)=>x-y).join("-");
+  const LIUHE = {"0-1":"子丑合(土)","2-11":"寅亥合(木)","3-10":"卯戌合(火)","4-9":"辰酉合(金)","5-8":"巳申合(水)","6-7":"午未合(土)"};
+  if(LIUHE[key]) return {label:LIUHE[key], color:"var(--jade)", dash:""};
+  const LIUCHONG = {"0-6":"子午沖","1-7":"丑未沖","2-8":"寅申沖","3-9":"卯酉沖","4-10":"辰戌沖","5-11":"巳亥沖"};
+  if(LIUCHONG[key]) return {label:LIUCHONG[key], color:"var(--cinnabar)", dash:""};
+  const XING = {"2-5":"寅巳刑(恃勢之刑)","5-8":"巳申刑(恃勢之刑)","2-8":"寅申刑(恃勢之刑)","1-10":"丑戌刑(無恩之刑)","7-10":"戌未刑(無恩之刑)","1-7":"丑未刑(無恩之刑)","0-3":"子卯刑(無禮之刑)"};
+  if(XING[key]) return {label:XING[key], color:"#C77A2E", dash:"5 4"};
+  const SANHE = [[8,0,4,"申子辰合水局(半合)"],[11,3,7,"亥卯未合木局(半合)"],[2,6,10,"寅午戌合火局(半合)"],[5,9,1,"巳酉丑合金局(半合)"]];
+  for(const [a,b,c,label] of SANHE){ if([a,b,c].includes(idxA) && [a,b,c].includes(idxB)) return {label, color:"var(--violet)", dash:"2 3"}; }
+  const SANHUI = [[2,3,4,"寅卯辰會東方木(半會)"],[5,6,7,"巳午未會南方火(半會)"],[8,9,10,"申酉戌會西方金(半會)"],[11,0,1,"亥子丑會北方水(半會)"]];
+  for(const [a,b,c,label] of SANHUI){ if([a,b,c].includes(idxA) && [a,b,c].includes(idxB)) return {label, color:"#7A5FC4", dash:"1 3"}; }
+  return null;
+}
+function renderXingChongDiagram(pillars){
+  const positions = { year:{x:150,y:44}, month:{x:256,y:150}, day:{x:150,y:256}, hour:{x:44,y:150} };
+  const pairsOrder = [["year","month"],["month","day"],["day","hour"],["hour","year"],["year","day"],["month","hour"]];
+  const legendMap = new Map();
+  let delay = 0.1, lines = "";
+  pairsOrder.forEach(([ka,kb])=>{
+    const pa = pillars.find(p=>p.key===ka), pb = pillars.find(p=>p.key===kb);
+    const rel = getZhiRelation(zhiIdx(pa.zhi), zhiIdx(pb.zhi));
+    if(rel){
+      const p1 = positions[ka], p2 = positions[kb];
+      lines += `<line class="xcp-line" x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${rel.color}" stroke-dasharray="${rel.dash}" style="animation-delay:${delay.toFixed(2)}s"></line>`;
+      legendMap.set(rel.label, rel.color);
+      delay += 0.12;
+    }
+  });
+  const nodes = pillars.map((p,i)=>{
+    const pos = positions[p.key];
+    return `
+      <g class="xcp-node" style="animation-delay:${(0.05+i*0.08).toFixed(2)}s">
+        <circle cx="${pos.x}" cy="${pos.y}" r="30" fill="url(#xcpGrad)" stroke="var(--gold-deep)" stroke-width="1.4"></circle>
+        <text class="xcp-label" x="${pos.x}" y="${pos.y-6}">${p.label}</text>
+        <text class="xcp-value" x="${pos.x}" y="${pos.y+15}">${p.zhi}</text>
+      </g>`;
+  }).join("");
+  const legendHtml = legendMap.size
+    ? `<div class="xcp-legend">${Array.from(legendMap.entries()).map(([label,color])=>`<span><i style="background:${color}"></i>${label}</span>`).join("")}</div>`
+    : `<div class="xcp-legend-empty">四柱地支之間目前沒有偵測到明顯的刑沖會合關係</div>`;
+  return `
+    <div class="xcp-wrap">
+      <div class="xcp-title">四柱刑沖會合關係圖</div>
+      <svg viewBox="0 0 300 300">
+        <defs><radialGradient id="xcpGrad" cx="50%" cy="35%" r="70%"><stop offset="0%" stop-color="#FBF6E9"></stop><stop offset="100%" stop-color="#EFE4C8"></stop></radialGradient></defs>
+        ${lines}
+        ${nodes}
+      </svg>
+      ${legendHtml}
+    </div>`;
+}
+
+/* ---------------------------------------------------------
+   3-5) 大運／流年時間軸（可左右滑動，點擊卡片看該十年逐年流年）
+--------------------------------------------------------- */
+let lastBaziYun = null;
+function calcAge(birthY, birthM, birthD){
+  const today = new Date();
+  let age = today.getFullYear() - birthY;
+  const beforeBirthday = (today.getMonth()+1 < birthM) || (today.getMonth()+1===birthM && today.getDate() < birthD);
+  if(beforeBirthday) age--;
+  return Math.max(1, age+1); // 虛歲，跟大限判斷基準一致
+}
+function renderDaYunTrack(yun, currentAge){
+  const list = yun.getDaYun(9);
+  const cards = list.map((dy,i)=>{
+    const gz = dy.getGanZhi();
+    if(!gz) return "";
+    const isCurrent = currentAge >= dy.getStartAge() && currentAge <= dy.getEndAge();
+    return `
+      <div class="dy-card${isCurrent ? " current" : ""}" data-index="${i}">
+        <div class="dy-age">${dy.getStartAge()}–${dy.getEndAge()}歲</div>
+        <div class="dy-gz">${gz}</div>
+        <div class="dy-year">${dy.getStartYear()}–${dy.getEndYear()}</div>
+      </div>`;
+  }).join("");
+  return cards;
+}
+function renderDaYunModal(dy){
+  const liunian = dy.getLiuNian();
+  const rows = liunian.map(ln=>`
+    <div class="ln-item">
+      <span class="ln-year mono">${ln.getYear()}</span>
+      <span class="ln-age">${ln.getAge()}歲</span>
+      <span class="ln-gz mono">${ln.getGanZhi()}</span>
+    </div>`).join("");
+  zwModal.innerHTML = `
+    <button class="zw-modal-close" id="zwModalClose" aria-label="關閉">✕</button>
+    <div class="zw-modal-top">大運　${dy.getStartAge()}–${dy.getEndAge()}歲　(${dy.getStartYear()}–${dy.getEndYear()})</div>
+    <div class="zw-modal-title">${dy.getGanZhi() || "起運前"}</div>
+    <div class="zw-modal-section-label">逐年流年</div>
+    <div class="ln-grid">${rows}</div>
+    <div class="zw-modal-foot">流年干支由 lunar-javascript 引擎依節氣精確排出；大運／流年僅反映干支五行氣場的大方向，實際運勢仍需綜合命局整體判斷，僅供參考。</div>`;
+  document.getElementById("zwModalClose").addEventListener("click", closeZwModal);
+  zwModalOverlay.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+document.getElementById("baziDaYun").addEventListener("click", (e)=>{
+  const card = e.target.closest(".dy-card");
+  if(!card || !lastBaziYun) return;
+  const idx = Number(card.getAttribute("data-index"));
+  const dy = lastBaziYun.getDaYun(9)[idx];
+  renderDaYunModal(dy);
+});
+
 document.getElementById("baziBtn").addEventListener("click", async ()=>{
   const dateVal = document.getElementById("baziDate").value;
   const hintEl = document.getElementById("baziDateHint");
@@ -1574,27 +1873,68 @@ document.getElementById("baziBtn").addEventListener("click", async ()=>{
   }
   const {y,m,d} = parsed;
   const hh = Number(document.getElementById("baziHour").value || 12);
-  const gender = document.getElementById("baziGender").value;
-  const pillars = getFourPillars(y,m,d,hh);
+  const mm = Number(document.getElementById("baziMinute").value || 0);
+  const genderText = document.getElementById("baziGender").value;
+  const genderCode = genderText === "男" ? 1 : 0;
+
+  // lunar-javascript 精確排盤（自動核對節氣，取代舊版的簡化估算公式）
+  const solar = Solar.fromYmdHms(y, m, d, hh, mm, 0);
+  const lunar = solar.getLunar();
+  const ec = lunar.getEightChar();
+
+  const pillars = {
+    year: ec.getYear(), month: ec.getMonth(), day: ec.getDay(), hour: ec.getTime(),
+    animal: sxTrad(lunar.getYearShengXiaoExact())
+  };
+  const pillarList = [
+    {key:"year",  label:"年支", zhi: ec.getYearZhi()},
+    {key:"month", label:"月支", zhi: ec.getMonthZhi()},
+    {key:"day",   label:"日支", zhi: ec.getDayZhi()},
+    {key:"hour",  label:"時支", zhi: ec.getTimeZhi()}
+  ];
 
   document.getElementById("baziChips").innerHTML = `
     <span class="chip mono">年柱 ${pillars.year}</span>
     <span class="chip mono">月柱 ${pillars.month}</span>
     <span class="chip mono">日柱 ${pillars.day}</span>
     <span class="chip mono">時柱 ${pillars.hour}</span>
-    <span class="chip">生肖 ${pillars.animal}</span>`;
+    <span class="chip">生肖 ${pillars.animal}</span>
+    <span class="chip">日主 ${ec.getDayGan()}(${STEM_ELEMENT[ec.getDayGan()]})</span>`;
+
+  document.getElementById("baziPillarTable").innerHTML = renderPillarTable(ec);
 
   const wuxingCounts = computeWuxing(pillars);
   const wuxingEl = document.getElementById("baziWuxing");
   wuxingEl.innerHTML = renderWuxingChart(wuxingCounts);
   animateWuxingPentagon(wuxingEl);
 
+  const strength = analyzeStrength(ec);
+  const strengthEl = document.getElementById("baziStrength");
+  strengthEl.innerHTML = renderStrength(strength);
+  animateStrengthBar(strengthEl);
+
+  const shenshaList = computeShenSha(ec.getDayGan(), ec.getDayZhi(), pillarList);
+  document.getElementById("baziShenSha").innerHTML = renderShenSha(shenshaList);
+
+  document.getElementById("baziRelations").innerHTML = renderXingChongDiagram(pillarList);
+
+  // 大運／流年
+  const yun = ec.getYun(genderCode);
+  lastBaziYun = yun;
+  const currentAge = calcAge(y, m, d);
+  document.getElementById("baziDyLabel").style.display = "";
+  document.getElementById("baziDaYun").innerHTML = renderDaYunTrack(yun, currentAge);
+
   const readingEl = document.getElementById("baziReading");
   readingEl.innerHTML = `<span class="placeholder mystic-loading"><span class="spin-rune">✦</span> 正在排盤演算...</span>`;
   const btn = document.getElementById("baziBtn"); btn.disabled = true;
+
+  const currentDaYun = yun.getDaYun(9).find(dy=> currentAge >= dy.getStartAge() && currentAge <= dy.getEndAge());
+  const shenshaText = shenshaList.length ? shenshaList.map(s=>`${s.name}(${s.at.join("、")})`).join("、") : "無明顯神煞組合";
+
   const text = await askClaude(
-    "你是一位穩重、用詞平實的命理顧問。使用者會給你四柱干支（簡化估算版），請用繁體中文，針對五行生剋的大方向給出個性傾向與生活建議的解讀，避免對健康、財務做絕對斷言，語氣溫和務實。控制在300字以內，並提醒這是簡化估算結果。",
-    `性別：${gender}。四柱：年柱${pillars.year}、月柱${pillars.month}、日柱${pillars.day}、時柱${pillars.hour}。五行統計：木${wuxingCounts.木}、火${wuxingCounts.火}、土${wuxingCounts.土}、金${wuxingCounts.金}、水${wuxingCounts.水}。請給我解讀，並可以呼應五行的分布狀況。`,
+    "你是一位穩重、用詞平實、學養深厚的命理顧問。使用者會給你完整的四柱八字資料（含十神、五行、納音、神煞、日主旺衰、目前大運），請用繁體中文，針對命局的個性傾向、大方向的際遇與生活建議給出解讀，可以自然地呼應十神配置、日主旺衰、目前大運干支的五行生剋關係，但避免對健康、財務做絕對斷言，語氣溫和務實。控制在350字以內，並提醒這是命理推算結果，僅供參考。",
+    `性別：${genderText}。四柱：年柱${pillars.year}、月柱${pillars.month}、日柱${pillars.day}（日主${ec.getDayGan()}）、時柱${pillars.hour}。五行統計：木${wuxingCounts.木}、火${wuxingCounts.火}、土${wuxingCounts.土}、金${wuxingCounts.金}、水${wuxingCounts.水}。十神：年干${ssTrad(ec.getYearShiShenGan())}、月干${ssTrad(ec.getMonthShiShenGan())}、時干${ssTrad(ec.getTimeShiShenGan())}。納音：年柱${nayinTrad(ec.getYearNaYin())}、月柱${nayinTrad(ec.getMonthNaYin())}、日柱${nayinTrad(ec.getDayNaYin())}、時柱${nayinTrad(ec.getTimeNaYin())}。神煞：${shenshaText}。日主旺衰判斷：${strength.verdict}（生扶洩耗比例約${Math.round(strength.ratio*100)}%），用神方向：${strength.yongElements.join("、")}${strength.jiElements.length?"，忌神方向："+strength.jiElements.join("、"):""}。目前虛歲${currentAge}歲，走的大運為${currentDaYun ? (currentDaYun.getGanZhi()||"起運前")+"（"+currentDaYun.getStartAge()+"–"+currentDaYun.getEndAge()+"歲）" : "尚未起運"}。請給我解讀，並可以呼應以上這些命理資訊的整體大方向。`,
     (sec)=>{ readingEl.innerHTML = `<span class="placeholder mystic-loading"><span class="spin-rune">✦</span> 系統忙碌中，${sec} 秒後自動重試...</span>`; }
   );
   readingEl.innerHTML = renderMarkdownLite(text);
