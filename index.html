@@ -718,6 +718,48 @@
     to{ opacity:1; transform:scale(1) rotate(0deg); }
   }
 
+  /* 星座：時間範圍切換（今日／本週／本月）V32 新增 */
+  .timeframe-toggle{ display:flex; gap:8px; margin-bottom:14px; }
+  .tf-btn{
+    flex:1; padding:8px 6px; border-radius:8px; border:1px solid var(--paper-line);
+    background:transparent; color:var(--ink-dim); font-family:'Noto Sans TC',sans-serif;
+    font-size:13px; cursor:pointer; transition:.2s; text-align:center;
+  }
+  .tf-btn:hover{ border-color:var(--gold-deep); color:var(--ink); }
+  .tf-btn.active{ background:var(--violet); color:#fff; border-color:var(--violet); }
+
+  /* 星座：星座特質延伸資訊（幸運色／幸運數字／速配星座）V32 新增，
+     在按下生成解讀的當下就先顯示（不用等 AI），先給出紮實的靜態占星資訊 */
+  .zodiac-extra-line{
+    font-size:12.5px; color:var(--ink-dim); line-height:1.9; margin:-6px 0 18px;
+    display:flex; flex-wrap:wrap; gap:4px 14px;
+    opacity:0; animation:chipPop .5s cubic-bezier(.2,.8,.3,1.1) .45s forwards;
+  }
+  .zodiac-extra-line b{ color:var(--ink); font-weight:700; }
+  @media (prefers-reduced-motion: reduce){ .zodiac-extra-line{ animation:none; opacity:1; } }
+
+  /* 星座：四維運勢量表卡（愛情／事業／財運／健康）V32 新增，
+     沿用既有的 .strength-bar / .strength-bar-fill 量表元件，維持視覺語彙一致 */
+  .zodiac-score-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px;
+  }
+  .zodiac-score-card{
+    background:rgba(255,255,255,0.5); border:1px solid var(--paper-line);
+    border-radius:12px; padding:12px 14px; opacity:0;
+    animation:chipPop .5s cubic-bezier(.2,.8,.3,1.1) forwards;
+  }
+  .zodiac-score-card:nth-child(1){ animation-delay:.1s; }
+  .zodiac-score-card:nth-child(2){ animation-delay:.2s; }
+  .zodiac-score-card:nth-child(3){ animation-delay:.3s; }
+  .zodiac-score-card:nth-child(4){ animation-delay:.4s; }
+  .zodiac-score-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .zodiac-score-label{ font-family:'Noto Serif TC',serif; font-weight:700; font-size:13.5px; color:var(--ink); }
+  .zodiac-score-num{ font-family:'Space Mono',monospace; font-size:12px; color:var(--gold-deep-dim); }
+  .zodiac-score-card .strength-bar{ margin-bottom:8px; }
+  .zodiac-score-text{ font-size:12px; color:var(--ink-dim); line-height:1.6; }
+  @media (max-width:480px){ .zodiac-score-grid{ grid-template-columns:1fr; } }
+  @media (prefers-reduced-motion: reduce){ .zodiac-score-card{ animation:none; opacity:1; } }
+
   .reading-highlight{
     position:relative; margin:0 0 16px; padding:14px 18px 14px 20px;
     border-left:3px solid var(--gold-deep); background:rgba(166,124,61,0.08);
@@ -877,6 +919,12 @@
         <label>國曆生日</label>
         <input type="text" id="zodiacDate" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="例如 19990101">
         <div class="field-hint" id="zodiacDateHint">直接輸入 8 碼數字，例如 19990101 代表 1999年01月01日</div>
+        <label>想了解的時間範圍</label>
+        <div class="timeframe-toggle" id="zodiacTimeframeToggle">
+          <button type="button" class="tf-btn active" data-tf="今日">今日</button>
+          <button type="button" class="tf-btn" data-tf="本週">本週</button>
+          <button type="button" class="tf-btn" data-tf="本月">本月</button>
+        </div>
         <label>想關注的主題（可選）</label>
         <input type="text" id="zodiacFocus" placeholder="例如：事業、感情、財運">
         <button class="btn" id="zodiacBtn">生成解讀</button>
@@ -884,6 +932,9 @@
       <div class="result-col" id="zodiacResultCol">
         <div class="zodiac-glyph-wrap" id="zodiacGlyphWrap"></div>
         <div class="structured" id="zodiacChips"></div>
+        <div class="zodiac-extra-line" id="zodiacExtraLine" style="display:none"></div>
+        <div class="zodiac-score-grid" id="zodiacScoreGrid" style="display:none"></div>
+        <div id="zodiacQuoteWrap"></div>
         <div class="reading" id="zodiacReading"><span class="placeholder">結果將顯示於此</span></div>
         <div class="disclaimer">星座運勢屬西方占星概念，僅供生活參考，非科學論斷。</div>
       </div>
@@ -1067,7 +1118,7 @@
    - 日期：每次開啟頁面自動抓當天日期，不用手動改
    - 版次：只要在這裡改 SITE_VERSION 一個地方，footer 會自動同步
 --------------------------------------------------------- */
-const SITE_VERSION = "V31"; // 之後更新版本，只需要改這一行，例如 "V32"
+const SITE_VERSION = "V32"; // 之後更新版本，只需要改這一行，例如 "V33"
 (function initFooterMeta(){
   const now = new Date();
   const y = now.getFullYear();
@@ -1275,6 +1326,33 @@ function getZodiac(month, day){
   return "未知";
 }
 
+// V32 新增：12 星座的延伸占星資料（元素／模式／守護星／幸運色與數字／速配與磨合星座）
+// 這些是不需要 AI 就能立即顯示的靜態資訊，一按下生成解讀就先出現，讓結果不再只有單薄的一段話。
+const ZODIAC_TRAITS = {
+  "牡羊座": {element:"火象", quality:"本位", ruling:"火星",  luckyColor:"紅色",   luckyNumber:9, best:["獅子座","射手座"], grow:"天秤座"},
+  "金牛座": {element:"土象", quality:"固定", ruling:"金星",  luckyColor:"綠色",   luckyNumber:6, best:["處女座","摩羯座"], grow:"天蠍座"},
+  "雙子座": {element:"風象", quality:"變動", ruling:"水星",  luckyColor:"黃色",   luckyNumber:5, best:["天秤座","水瓶座"], grow:"處女座"},
+  "巨蟹座": {element:"水象", quality:"本位", ruling:"月亮",  luckyColor:"銀白色", luckyNumber:2, best:["天蠍座","雙魚座"], grow:"摩羯座"},
+  "獅子座": {element:"火象", quality:"固定", ruling:"太陽",  luckyColor:"金色",   luckyNumber:1, best:["牡羊座","射手座"], grow:"水瓶座"},
+  "處女座": {element:"土象", quality:"變動", ruling:"水星",  luckyColor:"卡其色", luckyNumber:5, best:["金牛座","摩羯座"], grow:"雙魚座"},
+  "天秤座": {element:"風象", quality:"本位", ruling:"金星",  luckyColor:"粉藍色", luckyNumber:6, best:["雙子座","水瓶座"], grow:"牡羊座"},
+  "天蠍座": {element:"水象", quality:"固定", ruling:"冥王星",luckyColor:"深紅色", luckyNumber:4, best:["巨蟹座","雙魚座"], grow:"金牛座"},
+  "射手座": {element:"火象", quality:"變動", ruling:"木星",  luckyColor:"紫色",   luckyNumber:3, best:["牡羊座","獅子座"], grow:"雙子座"},
+  "摩羯座": {element:"土象", quality:"本位", ruling:"土星",  luckyColor:"深棕色", luckyNumber:8, best:["金牛座","處女座"], grow:"巨蟹座"},
+  "水瓶座": {element:"風象", quality:"固定", ruling:"天王星",luckyColor:"電光藍", luckyNumber:7, best:["雙子座","天秤座"], grow:"獅子座"},
+  "雙魚座": {element:"水象", quality:"變動", ruling:"海王星",luckyColor:"海藍色", luckyNumber:3, best:["巨蟹座","天蠍座"], grow:"射手座"}
+};
+
+// V32 新增：時間範圍切換（今日／本週／本月），影響 AI 解讀的時間尺度
+let zodiacTimeframe = "今日";
+document.querySelectorAll("#zodiacTimeframeToggle .tf-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll("#zodiacTimeframeToggle .tf-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    zodiacTimeframe = btn.getAttribute("data-tf");
+  });
+});
+
 /* ---------------------------------------------------------
    1.5) 星座符號 SVG（V10 新增）
    - 每個星座對應一個手繪風格的占星符號（僅路徑，不含外層 <svg>）
@@ -1306,6 +1384,43 @@ function renderZodiacGlyph(sign){
     <g class="zg-glyph" style="color:${info.color}">${info.path}</g>
   </svg>`;
 }
+// V32 新增：解析 AI 回傳的結構化格式（[LOVE]分數|文字 這種標籤格式），
+// 任何一個必要欄位缺漏就整體回傳 null，呼叫端會直接降級成單純大段文字顯示，
+// 不會因為 AI 這次剛好沒照格式回覆就讓畫面顯示壞掉或空白。
+function extractZodiacScoreField(raw, tag){
+  const re = new RegExp(`\\[${tag}\\]\\s*([1-5])\\s*\\|\\s*(.+)`);
+  const m = raw.match(re);
+  if(!m) return null;
+  return { score: parseInt(m[1],10), text: m[2].trim() };
+}
+function extractZodiacSimpleField(raw, tag){
+  const re = new RegExp(`\\[${tag}\\]\\s*(.+)`);
+  const m = raw.match(re);
+  return m ? m[1].trim() : null;
+}
+function parseZodiacStructured(raw){
+  const love = extractZodiacScoreField(raw, "LOVE");
+  const career = extractZodiacScoreField(raw, "CAREER");
+  const wealth = extractZodiacScoreField(raw, "WEALTH");
+  const health = extractZodiacScoreField(raw, "HEALTH");
+  const keyword = extractZodiacSimpleField(raw, "KEYWORD");
+  const quote = extractZodiacSimpleField(raw, "QUOTE");
+  const summaryMatch = raw.match(/\[SUMMARY\]([\s\S]*)/);
+  const summary = summaryMatch ? summaryMatch[1].trim() : null;
+  if(!love || !career || !wealth || !health || !summary) return null;
+  return { love, career, wealth, health, keyword: keyword||"", quote: quote||"", summary };
+}
+function renderZodiacScoreCard(label, icon, field){
+  return `<div class="zodiac-score-card">
+    <div class="zodiac-score-head">
+      <span class="zodiac-score-label">${icon} ${label}</span>
+      <span class="zodiac-score-num">${field.score} / 5</span>
+    </div>
+    <div class="strength-bar"><div class="strength-bar-fill" data-target-pct="${field.score*20}" style="width:0%"></div></div>
+    <div class="zodiac-score-text">${escapeHtml(field.text)}</div>
+  </div>`;
+}
+
 document.getElementById("zodiacBtn").addEventListener("click", async ()=>{
   const dateVal = document.getElementById("zodiacDate").value;
   const hintEl = document.getElementById("zodiacDateHint");
@@ -1317,19 +1432,70 @@ document.getElementById("zodiacBtn").addEventListener("click", async ()=>{
   }
   const {y,m,d} = parsed;
   const sign = getZodiac(m,d);
+  const traits = ZODIAC_TRAITS[sign];
   const focus = document.getElementById("zodiacFocus").value || "整體運勢";
+
+  // 靜態資訊不需要等 AI，按下按鈕當下就先顯示，結果不再只有生成中的空白
   document.getElementById("zodiacGlyphWrap").innerHTML = renderZodiacGlyph(sign);
-  document.getElementById("zodiacChips").innerHTML = `<span class="chip">星座：${sign}</span><span class="chip">關注：${focus}</span>`;
+  document.getElementById("zodiacChips").innerHTML =
+    `<span class="chip">星座：${sign}</span><span class="chip">${traits.element}星座</span>` +
+    `<span class="chip">${traits.quality}特質</span><span class="chip">守護星：${traits.ruling}</span>` +
+    `<span class="chip">關注：${focus}</span><span class="chip">${zodiacTimeframe}運勢</span>`;
+  const extraLine = document.getElementById("zodiacExtraLine");
+  extraLine.style.display = "flex";
+  extraLine.innerHTML =
+    `<span>🎨 幸運色：<b>${traits.luckyColor}</b></span>` +
+    `<span>🔢 幸運數字：<b>${traits.luckyNumber}</b></span>` +
+    `<span>💞 最速配：<b>${traits.best.join("、")}</b></span>` +
+    `<span>🌀 需要多磨合：<b>${traits.grow}</b></span>`;
+  // 先清空上一次的量表卡與重點提示，避免舊資料殘留一瞬間
+  document.getElementById("zodiacScoreGrid").style.display = "none";
+  document.getElementById("zodiacScoreGrid").innerHTML = "";
+  document.getElementById("zodiacQuoteWrap").innerHTML = "";
+
   triggerMysticFlash(document.getElementById("zodiacResultCol"));
   const readingEl = document.getElementById("zodiacReading");
   readingEl.innerHTML = `<span class="placeholder mystic-loading"><span class="spin-rune">✦</span> 正在為你解讀星象...</span>`;
   const btn = document.getElementById("zodiacBtn"); btn.disabled = true;
+
   const text = await askClaude(
-    "你是一位溫暖、務實的占星顧問。請用繁體中文，針對使用者的星座給予具體但不誇大、不做絕對預言的運勢建議，語氣像是善解人意的朋友，並在最後提醒運勢僅供參考。控制在250字以內。",
-    `我是${sign}，我想了解關於「${focus}」的近期運勢，請給我解讀與具體建議。`,
+    `你是一位溫暖、務實、觀察力敏銳的占星顧問。請用繁體中文，根據使用者的星座特質，針對指定的時間範圍給出具體、有畫面感、不落於空泛安慰的運勢解讀，避免「一切都會好起來」這類空話，盡量給出可以實際執行的具體建議。
+
+請務必嚴格按照以下格式輸出，每個標籤各占一行，方括號與直線符號都要保留，分數是 1 到 5 的整數，不要輸出格式以外的任何文字：
+[LOVE]分數|一句不超過40字、具體有畫面感的描述
+[CAREER]分數|一句不超過40字、具體有畫面感的描述
+[WEALTH]分數|一句不超過40字、具體有畫面感的描述
+[HEALTH]分數|一句不超過40字、具體有畫面感的描述
+[KEYWORD]這段時間的關鍵字（4個字以內）
+[QUOTE]一句具體的行動建議或提醒（30到50字）
+[SUMMARY]整體運勢的完整說明，可以分2到3段，最後提醒運勢僅供參考、不做絕對預言（180到240字）`,
+    `我是${sign}（${traits.element}星座、${traits.quality}特質、守護星是${traits.ruling}），我想了解「${zodiacTimeframe}」關於「${focus}」的運勢，請給我解讀與具體建議。`,
     (sec)=>{ readingEl.innerHTML = `<span class="placeholder mystic-loading"><span class="spin-rune">✦</span> 系統忙碌中，${sec} 秒後自動重試...</span>`; }
   );
-  readingEl.innerHTML = renderMarkdownLite(text);
+
+  const structured = parseZodiacStructured(text);
+  if(structured){
+    const scoreGrid = document.getElementById("zodiacScoreGrid");
+    scoreGrid.style.display = "grid";
+    scoreGrid.innerHTML =
+      renderZodiacScoreCard("愛情","💗", structured.love) +
+      renderZodiacScoreCard("事業","💼", structured.career) +
+      renderZodiacScoreCard("財運","💰", structured.wealth) +
+      renderZodiacScoreCard("健康","🌿", structured.health);
+    scoreGrid.querySelectorAll(".strength-bar-fill").forEach(fill=>{
+      requestAnimationFrame(()=>{ fill.style.width = fill.getAttribute("data-target-pct") + "%"; });
+    });
+    const quoteWrap = document.getElementById("zodiacQuoteWrap");
+    quoteWrap.innerHTML = structured.quote
+      ? `<div class="reading-highlight"><span class="rh-tag">✦ ${structured.keyword ? structured.keyword+"・" : ""}${zodiacTimeframe}提醒</span>${escapeHtml(structured.quote)}</div>`
+      : "";
+    readingEl.innerHTML = renderMarkdownLite(structured.summary);
+  } else {
+    // AI 這次沒有照指定格式回覆（偶爾會發生），降級成單純大段文字顯示，畫面不會壞掉或空白
+    document.getElementById("zodiacScoreGrid").style.display = "none";
+    document.getElementById("zodiacQuoteWrap").innerHTML = "";
+    readingEl.innerHTML = renderMarkdownLite(text);
+  }
   triggerMysticFlash(document.getElementById("zodiacResultCol"));
   btn.disabled = false;
 });
