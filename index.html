@@ -32,9 +32,13 @@
     --gold-deep-dim: #8C6B2E;
   }
   *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
+  html{scroll-behavior:smooth; overflow-x:hidden; width:100%;}
+  /* 防止手機版「出框」：任何子元件如果不小心比螢幕寬（例如圖表、表格、圖示），
+     只會被裁切掉看不見的部分，不會讓整個頁面被撐開產生橫向捲動軸。
+     裡面原本就需要左右滑動的區塊（大運卡片 .dy-track、塔羅牌 .tarot-cards 等）
+     都各自有自己獨立的 overflow-x:auto，不受這裡影響，滑動功能還是正常。 */
   body{
-    margin:0;
+    margin:0; overflow-x:hidden; width:100%; max-width:100vw;
     background:
       radial-gradient(1px 1px at 10% 20%, rgba(242,236,221,0.6) 0, transparent 60%),
       radial-gradient(1px 1px at 80% 10%, rgba(242,236,221,0.5) 0, transparent 60%),
@@ -552,13 +556,14 @@
     position:fixed; inset:0; background:rgba(20,18,43,0.68);
     display:flex; align-items:center; justify-content:center;
     padding:24px; z-index:200; opacity:0; pointer-events:none;
-    transition:opacity .2s;
+    transition:opacity .2s; overscroll-behavior:contain;
   }
   .zw-modal-overlay.open{ opacity:1; pointer-events:auto; }
   .zw-modal{
     background:linear-gradient(165deg, var(--paper) 0%, var(--paper-alt) 100%);
     border:1px solid var(--paper-line); border-radius:16px;
     max-width:480px; width:100%; max-height:85vh; overflow-y:auto;
+    overscroll-behavior:contain;
     padding:26px 26px 22px; position:relative;
     box-shadow:0 30px 80px rgba(0,0,0,0.4);
     transform:scale(.94) translateY(8px); transition:transform .22s;
@@ -893,8 +898,8 @@
 
   <!-- ===================== 八字 ===================== -->
   <section class="panel" id="bazi" data-index="03 / BAZI">
-    <h2>八字四柱（進階版）</h2>
-    <div class="sub">使用開源 lunar-javascript 引擎精確排盤，自動推算十神／五行／納音／神煞／日主旺衰／大運流年</div>
+    <h2>八字四柱</h2>
+    <div class="sub">依節氣精確排盤，自動推算十神、五行、納音、神煞、日主旺衰與大運流年</div>
     <div class="grid">
       <div>
         <label>國曆出生日期</label>
@@ -920,7 +925,7 @@
         <div class="dy-section-label" id="baziDyLabel" style="display:none;">大運／流年（左右滑動瀏覽，點擊卡片看該十年逐年流年）</div>
         <div id="baziDaYun" class="dy-track"></div>
         <div class="reading" id="baziReading"><span class="placeholder">結果將顯示於此</span></div>
-        <div class="disclaimer">四柱、十神、五行、納音、大運流年由開源 <a href="https://github.com/6tail/lunar-javascript" target="_blank" rel="noopener">lunar-javascript</a> 引擎依節氣精確排盤；日主旺衰與用神喜忌為簡化版強弱判斷法，僅供初步參考，非傳統命理師的完整格局論斷。</div>
+        <div class="disclaimer">四柱、十神、五行、納音、大運流年皆依節氣精確推算排盤；日主旺衰與用神喜忌為簡化版強弱判斷法，僅供初步參考，非傳統命理師的完整格局論斷。</div>
       </div>
     </div>
   </section>
@@ -1047,7 +1052,7 @@
    - 日期：每次開啟頁面自動抓當天日期，不用手動改
    - 版次：只要在這裡改 SITE_VERSION 一個地方，footer 會自動同步
 --------------------------------------------------------- */
-const SITE_VERSION = "V26"; // 之後更新版本，只需要改這一行，例如 "V27"
+const SITE_VERSION = "V27"; // 之後更新版本，只需要改這一行，例如 "V28"
 (function initFooterMeta(){
   const now = new Date();
   const y = now.getFullYear();
@@ -1850,7 +1855,7 @@ function renderDaYunModal(dy){
     <div class="zw-modal-title">${dy.getGanZhi() || "起運前"}</div>
     <div class="zw-modal-section-label">逐年流年</div>
     <div class="ln-grid">${rows}</div>
-    <div class="zw-modal-foot">流年干支由 lunar-javascript 引擎依節氣精確排出；大運／流年僅反映干支五行氣場的大方向，實際運勢仍需綜合命局整體判斷，僅供參考。</div>`;
+    <div class="zw-modal-foot">流年干支皆依節氣精確推算排出；大運／流年僅反映干支五行氣場的大方向，實際運勢仍需綜合命局整體判斷，僅供參考。</div>`;
   document.getElementById("zwModalClose").addEventListener("click", closeZwModal);
   zwModalOverlay.classList.add("open");
   document.body.style.overflow = "hidden";
