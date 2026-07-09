@@ -219,7 +219,8 @@
   }
   .panel .sub{color:var(--ink-dim); font-size:14px; margin-bottom:28px;}
   .grid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.2fr); gap:36px;}
-  @media (max-width:800px){ .grid{grid-template-columns:1fr;} }
+  .grid > *{ min-width:0; }
+  @media (max-width:800px){ .grid{grid-template-columns:minmax(0,1fr);} }
 
   label{display:block; font-size:13px; color:var(--gold-deep-dim); margin:16px 0 6px; letter-spacing:1px;}
   input[type=text], input[type=date], input[type=time], input[type=number], textarea, select{
@@ -249,6 +250,7 @@
 
   .result-col{
     border-left:1px solid var(--paper-line); padding-left:32px;
+    min-width:0; max-width:100%; overflow-x:hidden;
   }
   @media (max-width:800px){ .result-col{border-left:none; border-top:1px solid var(--paper-line); padding-left:0; padding-top:24px;} }
   .structured{
@@ -1062,7 +1064,7 @@
    - 日期：每次開啟頁面自動抓當天日期，不用手動改
    - 版次：只要在這裡改 SITE_VERSION 一個地方，footer 會自動同步
 --------------------------------------------------------- */
-const SITE_VERSION = "V28"; // 之後更新版本，只需要改這一行，例如 "V29"
+const SITE_VERSION = "V29"; // 之後更新版本，只需要改這一行，例如 "V30"
 (function initFooterMeta(){
   const now = new Date();
   const y = now.getFullYear();
