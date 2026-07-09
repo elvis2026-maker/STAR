@@ -1004,10 +1004,6 @@
     </div>
     <div class="ziwei-chart-hint" id="ziweiChartHint" style="display:none;">💡 手機螢幕較小，字看不清楚可以左右滑動找到想看的宮位，點一下該宮位可以放大查看完整內容</div>
 
-    <div class="zw-modal-overlay" id="zwModalOverlay">
-      <div class="zw-modal" id="zwModal" role="dialog" aria-modal="true"></div>
-    </div>
-
     <div class="result-col" id="ziweiResultCol" style="border-left:none; padding-left:0; margin-top:28px;">
       <div class="reading" id="ziweiReading"><span class="placeholder">AI 解讀將顯示於此</span></div>
     </div>
@@ -1015,6 +1011,13 @@
   </section>
 
 </main>
+
+<!-- 共用放大檢視視窗（紫微命宮／八字大運流年皆共用）：
+     刻意放在 main 外層、所有 .panel 之外，避免被非目前分頁的 .panel{display:none} 連帶隱藏，
+     這是先前「切到八字分頁點大運卡片沒反應」問題的根因。 -->
+<div class="zw-modal-overlay" id="zwModalOverlay">
+  <div class="zw-modal" id="zwModal" role="dialog" aria-modal="true"></div>
+</div>
 
 <footer>
   玄象所 · 命理整合原型 &nbsp;|&nbsp; 內容由 AI 生成，僅供娛樂參考，不作為醫療、財務或法律決策依據
@@ -1064,7 +1067,7 @@
    - 日期：每次開啟頁面自動抓當天日期，不用手動改
    - 版次：只要在這裡改 SITE_VERSION 一個地方，footer 會自動同步
 --------------------------------------------------------- */
-const SITE_VERSION = "V29"; // 之後更新版本，只需要改這一行，例如 "V30"
+const SITE_VERSION = "V30"; // 之後更新版本，只需要改這一行，例如 "V31"
 (function initFooterMeta(){
   const now = new Date();
   const y = now.getFullYear();
