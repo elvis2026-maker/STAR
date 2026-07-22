@@ -244,14 +244,20 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
+    // 注意：這裡（以及下面兩處）回傳的 text 會直接被前端當成「解讀內容」顯示出來，
+    // 所以措辭要順著命理網站的調性走，不要出現「AI」「生成」「伺服器」這類技術字眼，
+    // 讓使用者覺得是卦象／天機暫時不明朗，而不是網站故障。
+    // 至於上面 res.status(...).json({ error: ... }) 那些技術性錯誤訊息不受影響，
+    // 那些是給開發者看 log／debug 用的，前端 askClaude() 也不會把它們直接顯示給使用者。
+
     // Gemini 有時會因為安全過濾器擋下回應，這裡順便處理一下，訊息比較好懂
     const candidate = data?.candidates?.[0];
     if (!candidate) {
       console.error("Gemini 回應沒有 candidates：", JSON.stringify(data));
-      return res.status(200).json({ text: "（沒有取得回應，請稍後再試）" });
+      return res.status(200).json({ text: "天機此刻運行受阻，暫時無法為您解讀，請稍後再試一次。" });
     }
     if (candidate.finishReason === "SAFETY") {
-      return res.status(200).json({ text: "這個問題的內容無法生成解讀，請換個方式描述看看。" });
+      return res.status(200).json({ text: "這個提問暫時無法窺得卦象，請換個方式再問一次看看。" });
     }
 
     const text = (candidate.content?.parts || [])
@@ -259,7 +265,7 @@ export default async function handler(req, res) {
       .join("\n")
       .trim();
 
-    const finalText = text || "（沒有取得回應，請稍後再試）";
+    const finalText = text || "天機此刻運行受阻，暫時無法為您解讀，請稍後再試一次。";
     if (text) setCached(cacheKey, finalText); // 只快取「有實際內容」的回應，避免把空白或錯誤訊息也快取住
     res.status(200).json({ text: finalText });
   } catch (err) {
