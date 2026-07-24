@@ -6,24 +6,21 @@
 // 記得到 Vercel 專案設定 → Environment Variables 加入 GEMINI_API_KEY
 // 金鑰申請網址：https://aistudio.google.com/apikey
 //
-// 免費額度模型用 gemini-2.5-flash 當主力（品質較好）。
+// 免費額度模型用 gemini-3.6-flash 當主力（品質較好）。
 // 如果撞到限額（429／模型不存在等錯誤），會自動改用下面 FALLBACK_MODELS 清單中的模型依序繼續嘗試，
 // 因為 Google AI Studio 免費額度是「每個模型各自獨立計算」，
 // 一個模型的額度用完，換另一個模型通常還有剩餘額度可以用，等於把免費額度加總起來用。
 //
 // 【2026/07 更新】Google 在 2026 年陸續調整了免費層可用的模型：
-//   - gemini-2.0-flash / gemini-2.0-flash-lite 已在 2026/6/1 停用，不要再加進清單（一定會 404）
-//   - gemini-2.5-pro 已改為付費限定（免費層不再提供）
-//   - gemini-3.1-flash-lite、gemini-flash-latest（目前指向 Gemini 3.5 Flash）、
-//     gemini-3-flash-preview 都是 2026 年中新增的免費層模型，額度是「獨立計算」，
+//   - Gemini 3.5 Flash、gemini-3.5-flash-lite（目前指向 Gemini 3.5 Flash）、
 //     所以都先加進備援清單，多幾個可以分攤流量的免費額度
 //     （preview 模型的額度通常比較小、有時也會改名或下架，所以一定要放在清單「後段」，
 //     萬一哪天真的失效或改名，也只是很快 404、自動跳到下一個，不會卡住整支 API）
 // 每個 Google Cloud 專案實際額度可能不同（同一個模型不同專案的每日上限不一定一樣），
 // 建議直接到 https://aistudio.google.com/rate-limit 看自己專案「目前」的即時額度，比任何文章上的數字都準。
 // 之後想再加開別的免費模型當備援，直接把模型名稱加進這個陣列即可（會依序嘗試，任何一個失敗都會自動換下一個）。
-const MODEL = "gemini-2.5-flash";
-const FALLBACK_MODELS = ["gemini-2.5-flash-lite", "gemini-3-flash-preview", "gemini-3.1-flash-lite", "gemini-flash-latest"];
+const MODEL = "gemini-3.6-flash";
+const FALLBACK_MODELS = ["gemini-3.5-flash", "gemini-3.5-flash-lite"];
 
 // ---------------------------------------------------------
 // V23 新增：Groq 免費備援（選用，不設定也完全不影響原本功能）
