@@ -179,6 +179,25 @@ export default async function handler(req, res) {
 
   // V36：改成多把金鑰輪替，這裡先不急著檢查，等下面統一判斷「有沒有任何一種金鑰可用」
 
+  // ---------------------------------------------------------
+  // V37 新增：修正 gemini-3.6-flash 回傳 400 INVALID_ARGUMENT 的問題
+  // 原因：Google 從 gemini-3.6-flash／gemini-3.5-flash-lite 這兩個模型開始（以及之後發布的新模型），
+  // 把原本數字型的 thinkingConfig.thinkingBudget 換成新的字串等級 thinkingConfig.thinkingLevel
+  // （可選 "minimal" / "low" / "medium" / "high"），舊的 thinkingBudget 欄位在這些新模型上會直接被拒絕、
+  // 回傳 400 INVALID_ARGUMENT；而 gemini-3.5-flash 這種在 3.6-flash 之前發布的模型，
+  // 仍然吃舊版的 thinkingBudget（這也是為什麼 log 裡看到 3.6-flash 失敗、自動改用 3.5-flash 備援就成功了）。
+  // 這裡用一個名單記錄「需要改用新版 thinkingLevel」的模型，其餘模型維持舊版 thinkingBudget:0，
+  // 兩種都是「盡量不要花時間深度思考、求快求省」的對應設定，效果一致，只是新版模型的參數名稱換了。
+  // 之後如果 Google 又推出新模型且一樣要求 thinkingLevel，把模型名稱加進這個名單即可。
+  // ---------------------------------------------------------
+  const NEW_THINKING_API_MODELS = new Set(["gemini-3.6-flash", "gemini-3.5-flash-lite"]);
+  function buildThinkingConfig(model) {
+    if (NEW_THINKING_API_MODELS.has(model)) {
+      return { thinkingLevel: "minimal" };
+    }
+    return { thinkingBudget: 0 };
+  }
+
   // 把「用某把金鑰呼叫某一個 Gemini 模型」包成一個函式，方便待會依序嘗試多把金鑰 × 多個模型
   async function callGeminiModel(model, apiKey) {
     const response = await fetch(
@@ -195,7 +214,7 @@ export default async function handler(req, res) {
           generationConfig: {
             maxOutputTokens: 1500,
             temperature: 0.9,
-            thinkingConfig: { thinkingBudget: 0 }
+            thinkingConfig: buildThinkingConfig(model)
           }
         })
       }

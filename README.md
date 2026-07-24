@@ -5,7 +5,7 @@
 ## 這個資料夾要部署到 GitHub + Vercel（推薦方式）
 
 ```
-MILI-V36/
+MILI-V37/
 ├── index.html          ← 前端網頁（星座/塔羅/八字/姓名學/紫微斗數）
 ├── vendor/
 │   ├── iztro.min.js    ← 紫微斗數排盤引擎（開源套件，內建在專案裡，不依賴外部 CDN）
@@ -43,7 +43,8 @@ V2 開始改用 **Google Gemini API**（目前主力模型是 `gemini-3.6-flash`
 
 
 ## 版本紀錄
-- **V36（目前版本）**：依指定調整 AI 模型與金鑰輪替順序——① `MODEL`／`FALLBACK_MODELS` 換成 `gemini-3.6-flash` → `gemini-3.5-flash` → `gemini-3.5-flash-lite`（Google 2026/7/21 發布的最新一代 Flash 系列，取代原本的 2.5/3.1 系列）。② 新增第二把 Gemini 金鑰支援：`GEMINI_API_KEY` 三個模型都失敗後，會自動改用 `MI_GEMINI_API_KEY`（若有設定）再依序試過三個模型，才輪到 Groq；只設定一把金鑰也完全相容、不影響原本行為。完整嘗試順序：`GEMINI_API_KEY` → `MI_GEMINI_API_KEY` → `GROQ_API_KEY`。
+- **V37（目前版本）**：修正 `gemini-3.6-flash` 每次呼叫都回傳 `400 INVALID_ARGUMENT` 的問題（實際上會自動 fallback 到 `gemini-3.5-flash` 成功，所以網站表面上正常，但主力模型其實完全沒被用到）。根因：Google 從 `gemini-3.6-flash`／`gemini-3.5-flash-lite` 這兩個模型開始，把舊版數字型的 `thinkingConfig.thinkingBudget` 換成新版字串等級 `thinkingConfig.thinkingLevel`（`minimal`/`low`/`medium`/`high`），繼續送舊參數會被直接拒絕；`gemini-3.5-flash` 因為是在這次改版之前發布的模型，還相容舊參數，才會 fallback 成功、掩蓋了 3.6-flash 其實一直失敗的事實。修法：`api/interpret.js` 新增一個模型名單，`gemini-3.6-flash` 與 `gemini-3.5-flash-lite` 改送 `thinkingLevel: "minimal"`，其餘模型維持原本的 `thinkingBudget: 0`，之後 Google 再推出同樣要求新參數的模型，把名稱加進這個名單即可。
+- V36：依指定調整 AI 模型與金鑰輪替順序——① `MODEL`／`FALLBACK_MODELS` 換成 `gemini-3.6-flash` → `gemini-3.5-flash` → `gemini-3.5-flash-lite`（Google 2026/7/21 發布的最新一代 Flash 系列，取代原本的 2.5/3.1 系列）。② 新增第二把 Gemini 金鑰支援：`GEMINI_API_KEY` 三個模型都失敗後，會自動改用 `MI_GEMINI_API_KEY`（若有設定）再依序試過三個模型，才輪到 Groq；只設定一把金鑰也完全相容、不影響原本行為。完整嘗試順序：`GEMINI_API_KEY` → `MI_GEMINI_API_KEY` → `GROQ_API_KEY`。
 - V35：頁首 LOGO 換成使用者提供的新版盾牌＋電路紋路造型 ELVIS 圖標。原圖背景是接近純黑的深色漸層，直接貼上去會在頁首出現一塊突兀的方形色塊，所以先用去背處理：以每個像素 RGB 最大值當作亮度依據，把偏暗的背景區域轉成漸層透明（越暗越透明、保留亮部的霓虹光暈與文字），再裁掉四周多餘的透明邊界、縮放到頁首合適的顯示尺寸，這樣 LOGO 就能自然融入頁首本來的深紫色底（`rgba(20,18,43,0.85)`），不會有背景色塊的違和感。另外把整個品牌區（LOGO＋「艾維斯玄象所 / ELVIS ORACLE」文字）包成一個連結，點擊會在新分頁開啟 `https://elvis2026-maker.github.io/MIS/`（艾維斯資訊 IT 顧問官網，跟頁尾原本的連結一致），滑鼠移上去有淡出效果提示可以點擊。
 - V34：①主標題「玄象所」改為「艾維斯玄象所」，並在 `<title>`、頁首品牌區與頁尾都同步更新；頁首品牌區改成中英文雙行顯示，logo 右側上排是中文「艾維斯玄象所」、下排新增英文名稱「ELVIS ORACLE」（沿用命理神諭 Oracle 的意象），寫法比照艾維斯其他站點（如「艾維斯上班所 / ELVIS WORKDESK」）的中英並列風格。②頁尾大改版精簡：原本燙金銘牌（掃光動畫方塊）＋額外一行 build-info 的兩層結構，合併成單一行「Elvis 程式設計 ‧ 艾維斯資訊顧問 IT ‧ 版次 ‧ 日期」，配色與字體維持原本的暗金色 `Space Mono` 風格不變，只是排版更簡潔；原本的超連結（點擊前往作者頁面）保留在「Elvis 程式設計」文字上。日期顯示格式也從 `2026.07.22` 改成 `2026-07-22` 以符合這行的呈現方式。
 - V33：延續 V31 的方向，這次處理「AI 解讀失敗時」使用者實際會看到的文字。之前如果 Gemini 全部備援模型與 Groq 都失敗、或連不上後端，畫面上會直接顯示 `err.error` 原文，可能出現「AI 服務暫時無法回應」「無法連線到後端服務」這類技術字眼，對一個命理網站來說觀感生硬、也容易讓人誤以為網站壞了。現在改成：①前端 `askClaude()` 除了「輸入內容過長」這種使用者自己能修正的 400 錯誤仍照實顯示外，其餘所有失敗狀況（額度滿了、伺服器錯誤、連線失敗…）一律統一顯示同一句「天機此刻運行受阻，暫時無法為您解讀，請稍候片刻再試一次。」，不透露任何技術細節。②後端 `api/interpret.js` 裡原本會被當成解讀內容直接顯示的兩句話（Gemini 沒回應候選結果、安全過濾器擋下內容）也一併改成同調性的文字。技術性的 `error` 欄位本身不受影響，Vercel 的 Function Logs 還是能看到真正的錯誤原因，只是不會顯示在使用者畫面上。
@@ -103,10 +104,10 @@ V2 開始改用 **Google Gemini API**（目前主力模型是 `gemini-3.6-flash`
 
 **電腦操作（推薦，最快）：**
 ```bash
-cd MILI-V36
+cd MILI-V37
 git init
 git add .
-git commit -m "V36：AI 模型換成 gemini-3.6/3.5 系列，新增第二把 Gemini 金鑰輪替"
+git commit -m "V37：修正 gemini-3.6-flash 400 錯誤（thinkingBudget 換成 thinkingLevel）"
 git branch -M main
 git remote add origin https://github.com/你的帳號/你的repo名稱.git
 git push -u origin main
