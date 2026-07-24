@@ -4,34 +4,47 @@
 //
 // 這支改用 Google Gemini API（有免費額度、不用綁信用卡）。
 // 記得到 Vercel 專案設定 → Environment Variables 加入 GEMINI_API_KEY
+// （選用：也可以再加一把 MI_GEMINI_API_KEY 當備援金鑰，詳見下方「V36 新增：多組 Gemini 金鑰依序輪替」說明）
 // 金鑰申請網址：https://aistudio.google.com/apikey
 //
-// 免費額度模型用 gemini-3.6-flash 當主力（品質較好）。
+// 免費額度模型用 gemini-3.6-flash 當主力（品質最好、目前 Google 最新一代 Flash 主力機型）。
 // 如果撞到限額（429／模型不存在等錯誤），會自動改用下面 FALLBACK_MODELS 清單中的模型依序繼續嘗試，
 // 因為 Google AI Studio 免費額度是「每個模型各自獨立計算」，
 // 一個模型的額度用完，換另一個模型通常還有剩餘額度可以用，等於把免費額度加總起來用。
 //
-// 【2026/07 更新】Google 在 2026 年陸續調整了免費層可用的模型：
-//   - Gemini 3.5 Flash、gemini-3.5-flash-lite（目前指向 Gemini 3.5 Flash）、
-//     所以都先加進備援清單，多幾個可以分攤流量的免費額度
-//     （preview 模型的額度通常比較小、有時也會改名或下架，所以一定要放在清單「後段」，
-//     萬一哪天真的失效或改名，也只是很快 404、自動跳到下一個，不會卡住整支 API）
-// 每個 Google Cloud 專案實際額度可能不同（同一個模型不同專案的每日上限不一定一樣），
-// 建議直接到 https://aistudio.google.com/rate-limit 看自己專案「目前」的即時額度，比任何文章上的數字都準。
-// 之後想再加開別的免費模型當備援，直接把模型名稱加進這個陣列即可（會依序嘗試，任何一個失敗都會自動換下一個）。
+// 【2026/07 更新】Google 在 2026/7/21 發布了 Gemini 3.6 Flash 與 Gemini 3.5 Flash-Lite（GA 正式版），
+// 3.6 Flash 效能優於前代 3.5 Flash、輸出 token 用量更省，3.5 Flash-Lite 則是同代最快最省成本的版本；
+// 這次照你的指定，把清單換成這三個模型依序嘗試：
+//   1. gemini-3.6-flash（主力，品質最好）
+//   2. gemini-3.5-flash（備援，上一代主力機型）
+//   3. gemini-3.5-flash-lite（備援，最快最省，額度通常也最寬）
+// 之後想再調整順序或加開別的免費模型當備援，直接改這兩行常數即可（會依序嘗試，任何一個失敗都會自動換下一個）。
 const MODEL = "gemini-3.6-flash";
 const FALLBACK_MODELS = ["gemini-3.5-flash", "gemini-3.5-flash-lite"];
+const GEMINI_MODELS = [MODEL, ...FALLBACK_MODELS];
+
+// ---------------------------------------------------------
+// V36 新增：多組 Gemini 金鑰依序輪替
+// 如果你有兩個 Google 帳號（兩個獨立的 Google AI Studio 專案），各自申請一把 API 金鑰，
+// 額度是「各自獨立計算」的，等於多一份免費額度可以用：
+//   1. GEMINI_API_KEY     ← 主要金鑰，三個模型都會先用這把試過一輪
+//   2. MI_GEMINI_API_KEY  ← 第二把金鑰（例如另一個 Google 帳號申請的），
+//                           上面那把的三個模型全部失敗（額滿／出錯）才會換這把，一樣三個模型依序試過
+//   3. Groq（見下方 callGroq）← 兩把 Gemini 金鑰都試過仍失敗，最後才輪到 Groq 當保底
+// 只設定 GEMINI_API_KEY、沒設定 MI_GEMINI_API_KEY 也完全沒問題，程式會自動跳過沒設定的金鑰。
+// ---------------------------------------------------------
+const GEMINI_KEY_ENV_NAMES = ["GEMINI_API_KEY", "MI_GEMINI_API_KEY"];
 
 // ---------------------------------------------------------
 // V23 新增：Groq 免費備援（選用，不設定也完全不影響原本功能）
-// Gemini 全部模型的免費額度是「同一個 Google 專案共用一個總量」，
-// 流量大的時候整批模型可能同一天內都被用光；Groq 是完全不同的公司、不同的免費額度計算，
-// 等於是另外多一組「備用油箱」，兩邊都不用付費、都不用綁信用卡。
+// V36 更新：現在是排在兩把 Gemini 金鑰（GEMINI_API_KEY、MI_GEMINI_API_KEY）都各自試過三個模型、
+// 仍然全部失敗之後，才會輪到的「第三層」保底方案；Groq 是完全不同的公司、不同的免費額度計算，
+// 等於是另外多一組「備用油箱」，不用付費、不用綁信用卡。
 // 申請免費金鑰：https://console.groq.com/keys（註冊帳號→ API Keys → Create API Key）
 // 申請好之後，一樣到 Vercel 專案設定 → Environment Variables 加入 GROQ_API_KEY 即可自動啟用；
 // 沒有設定這個環境變數時，這段程式會直接跳過，不影響原本 Gemini 的行為。
 // 免費額度大約每天 14,400 次請求（依 Groq 官方公告為準，可能調整），
-// 用來當「Gemini 全部模型都額滿」時的最後一道備援，品質略遜於 Gemini 但足以應急。
+// 用來當「兩把 Gemini 金鑰、全部模型都額滿」時的最後一道備援，品質略遜於 Gemini 但足以應急。
 // ---------------------------------------------------------
 const GROQ_MODEL = "llama-3.1-8b-instant";
 async function callGroq(system, prompt) {
@@ -164,21 +177,17 @@ export default async function handler(req, res) {
     return res.status(200).json({ text: cachedText, cached: true });
   }
 
-  const rawKey = process.env.GEMINI_API_KEY || "";
-  if (!rawKey) {
-    console.error("GEMINI_API_KEY 尚未設定");
-    return res.status(500).json({ error: "伺服器尚未設定金鑰，請聯絡網站管理員" });
-  }
+  // V36：改成多把金鑰輪替，這裡先不急著檢查，等下面統一判斷「有沒有任何一種金鑰可用」
 
-  // 把「呼叫某一個 Gemini 模型」包成一個函式，方便待會依序嘗試多個模型
-  async function callGeminiModel(model) {
+  // 把「用某把金鑰呼叫某一個 Gemini 模型」包成一個函式，方便待會依序嘗試多把金鑰 × 多個模型
+  async function callGeminiModel(model, apiKey) {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-goog-api-key": process.env.GEMINI_API_KEY
+          "x-goog-api-key": apiKey
         },
         body: JSON.stringify({
           contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -195,42 +204,54 @@ export default async function handler(req, res) {
   }
 
   try {
-    const modelsToTry = [MODEL, ...FALLBACK_MODELS];
+    // 只留下「有實際設定值」的金鑰，依 GEMINI_KEY_ENV_NAMES 的順序（GEMINI_API_KEY → MI_GEMINI_API_KEY）
+    const geminiKeys = GEMINI_KEY_ENV_NAMES
+      .map(envName => ({ envName, apiKey: process.env[envName] || "" }))
+      .filter(k => k.apiKey);
+
     let response = null;
     let lastStatus = null;
+    let succeeded = false;
 
-    for (let i = 0; i < modelsToTry.length; i++) {
-      const model = modelsToTry[i];
-      response = await callGeminiModel(model);
+    // 外層跑「哪一把金鑰」，內層跑「哪一個模型」：
+    // 第一把金鑰的三個模型都試過還是不行，才會換下一把金鑰、一樣三個模型依序再試一輪。
+    keyLoop:
+    for (let k = 0; k < geminiKeys.length; k++) {
+      const { envName, apiKey } = geminiKeys[k];
+      for (let i = 0; i < GEMINI_MODELS.length; i++) {
+        const model = GEMINI_MODELS[i];
+        response = await callGeminiModel(model, apiKey);
 
-      if (response.ok) {
-        if (i > 0) console.warn(`「${modelsToTry[0]}」額度已滿，已自動改用備援模型「${model}」`);
-        break;
+        if (response.ok) {
+          succeeded = true;
+          if (k > 0 || i > 0) {
+            console.warn(`已自動改用「${envName}」金鑰 + 模型「${model}」`);
+          }
+          break keyLoop;
+        }
+
+        lastStatus = response.status;
+        const errBody = await response.json().catch(() => ({}));
+        console.error(`Gemini API 錯誤（金鑰：${envName}，模型：${model}）：`, response.status, errBody);
+        // 不管這次是什麼錯誤（額度已滿 429、這把金鑰沒開通該模型 403/404、
+        // 模型名稱打錯或已停用 400...）都直接換下一個模型／下一把金鑰繼續嘗試，
+        // 就算某個模型在某把金鑰上其實不存在／沒開通，也只是很快失敗、自動跳到下一個，不會卡住。
       }
-
-      lastStatus = response.status;
-      const errBody = await response.json().catch(() => ({}));
-      console.error(`Gemini API 錯誤（模型：${model}）：`, response.status, errBody);
-
-      // 只要清單裡還有下一個模型可以試，不管這次是什麼錯誤（額度已滿 429、
-      // 這個專案未開通該模型 403/404、模型名稱打錯或已停用 400...）都直接換下一個繼續嘗試，
-      // 這樣之後在 FALLBACK_MODELS 陣列裡新增任何模型名稱都很安全，
-      // 就算那個模型在你的專案上其實不存在／沒開通，也只是很快失敗、自動跳到下一個，不會卡住。
-      if (i < modelsToTry.length - 1) {
-        continue;
-      }
-      break;
     }
 
-    if (!response.ok) {
-      // Gemini 全部模型都試過了、都還是失敗 —— 最後再試一次 Groq（如果有設定金鑰的話）
+    if (!succeeded) {
+      // 兩把 Gemini 金鑰、每把三個模型全部試過了、都還是失敗 —— 最後再試一次 Groq（如果有設定金鑰的話）
       const groqText = await callGroq(system, prompt);
       if (groqText) {
         setCached(cacheKey, groqText);
         return res.status(200).json({ text: groqText, provider: "groq" });
       }
 
-      // 連 Groq 都沒有設定或也失敗了，回報原本 Gemini 的錯誤
+      // 一把 Gemini 金鑰都沒設定、Groq 也沒設定或也失敗了
+      if (geminiKeys.length === 0) {
+        console.error("GEMINI_API_KEY / MI_GEMINI_API_KEY 都尚未設定，且 Groq 也無法使用");
+        return res.status(500).json({ error: "伺服器尚未設定金鑰，請聯絡網站管理員" });
+      }
       if (lastStatus === 429) {
         return res
           .status(429)
